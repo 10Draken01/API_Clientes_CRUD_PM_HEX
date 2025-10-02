@@ -26,12 +26,7 @@ export class UserController {
 
       res.status(200).json({
         success: true,
-        message: 'Login successful',
-        data: {
-          id: response.id,
-          username: response.username,
-          email: response.email
-        }
+        message: 'Login successful'
       });
     } catch (error) {
       if (error instanceof UserNotExistsException) {
