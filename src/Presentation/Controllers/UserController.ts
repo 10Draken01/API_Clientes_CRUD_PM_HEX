@@ -32,8 +32,7 @@ export class UserController {
       if (error instanceof UserNotExistsException) {
         res.status(404).json({
           success: false,
-          error: 'Conflict',
-          message: error.message
+          message: `Conflict: ${error.message}`
         });
         return;
       }
@@ -41,16 +40,14 @@ export class UserController {
       if (error instanceof Error) {
         res.status(400).json({
           success: false,
-          error: 'Bad Request',
-          message: error.message
+          message: `Bad Request: ${error.message}`
         });
         return;
       }
 
       res.status(500).json({
         success: false,
-        error: 'Internal Server Error',
-        message: 'An unexpected error occurred'
+        message: 'Internal Server Error: An unexpected error occurred'
       });
     }
   }
@@ -63,19 +60,17 @@ export class UserController {
         password: req.body.password,
       };
 
-      const response = await this.registerUseCase.execute(request);
+      await this.registerUseCase.execute(request);
 
-      res.status(201).json({
+      res.status(200).json({
         success: true,
-        message: 'User registered successfully',
-        data: response
+        message: 'Register successfully'
       });
     } catch (error) {
       if (error instanceof UserAlreadyExistsException) {
         res.status(409).json({
           success: false,
-          error: 'Conflict',
-          message: error.message
+          message: `Conflict: ${error.message}`
         });
         return;
       }
@@ -83,16 +78,14 @@ export class UserController {
       if (error instanceof Error) {
         res.status(400).json({
           success: false,
-          error: 'Bad Request',
-          message: error.message
+          message: `Bad Request: ${error.message}`
         });
         return;
       }
 
       res.status(500).json({
         success: false,
-        error: 'Internal Server Error',
-        message: 'An unexpected error occurred'
+        message: 'Internal Server Error: An unexpected error occurred'
       });
     }
   }

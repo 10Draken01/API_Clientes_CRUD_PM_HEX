@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 80;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017';
 const DB_NAME = process.env.DB_NAME || 'movilesdb';
 const JWT_SECRET = process.env.JWT_SECRET || 'defaultsecret'; 

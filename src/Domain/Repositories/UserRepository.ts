@@ -1,4 +1,4 @@
-import { UserFounded } from "../../Application/DTOs/UserFounded";
+import { InsertOneResult } from "mongodb";
 import { User } from "../Entities/User";
 
 export interface UserRepository {
