@@ -33,7 +33,7 @@ export class LoginUseCase {
     }
 
     const tokenPayload = {
-      id: existingUser.id,
+      _id: existingUser._id,
       username: existingUser.username,
       email: email.getValue(),
     }
@@ -42,7 +42,7 @@ export class LoginUseCase {
 
     // Retornar respuesta
     return {
-      id: existingUser.id,
+      _id: existingUser._id,
       username: existingUser.username,
       email: email.getValue(),
       token: token, // Aquí deberías generar un token JWT

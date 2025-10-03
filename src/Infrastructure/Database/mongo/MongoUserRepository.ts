@@ -1,45 +1,26 @@
-import { MongoClient, Db, Collection } from 'mongodb';
+import { Db, Collection } from 'mongodb';
 import { UserRepository } from '../../../Domain/Repositories/UserRepository';
 import { User } from '../../../Domain/Entities/User';
-import { UserFounded } from '../../../Application/DTOs/UserFounded';
-
-interface UserDocument {
-  _id: string;
-  username: string;
-  email: string;
-  password: string;
-}
 
 export class MongoUserRepository implements UserRepository {
-  private readonly collection: Collection<UserDocument>;
+  private readonly collection: Collection<User>;
 
   constructor(database: Db) {
-    this.collection = database.collection<UserDocument>('users');
+    this.collection = database.collection<User>('users');
   }
 
   async save(user: User): Promise<void> {
-    const document: UserDocument = {
-      _id: user.id,
-      username: user.username,
-      email: user.email,
-      password: user.password
-    };
 
-    await this.collection.insertOne(document);
+    await this.collection.insertOne(user);
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const document = await this.collection.findOne({ email });
+    const user = await this.collection.findOne({ email });
     
-    if (!document) {
+    if (!user) {
       return null;
     }
 
-    return {
-      id: document._id,
-      username: document.username,
-      email: document.email,
-      password: document.password
-    };
+    return user;
   }
 }

@@ -35,7 +35,7 @@ export class RegisterUseCase {
 
     // Crear el usuario
     const user: User = {
-      id: userId.getValue(),
+      _id: userId.getValue(),
       username: username.getValue(),
       email: email.getValue(),
       password: password.getValue(), // En un caso real, deberías hashear la contraseña
@@ -45,10 +45,6 @@ export class RegisterUseCase {
     await this.userRepository.save(user);
 
     // Retornar respuesta
-    return {
-      id: user.id,
-      email: user.email,
-      username: user.username
-    };
+    return user;
   }
 }
