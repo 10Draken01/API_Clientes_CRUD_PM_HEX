@@ -32,7 +32,7 @@ export class UserController {
       if (error instanceof UserNotExistsException) {
         res.status(404).json({
           success: false,
-          message: `Conflict: ${error.message}`
+          message: `Not Found: ${error.message}`
         });
         return;
       }
@@ -40,7 +40,8 @@ export class UserController {
       if (error instanceof Error) {
         res.status(400).json({
           success: false,
-          message: `Bad Request: ${error.message}`
+          error: 'Bad Request',
+          message: error.message
         });
         return;
       }
@@ -64,7 +65,8 @@ export class UserController {
 
       res.status(200).json({
         success: true,
-        message: 'Register successfully'
+        message: 'User registered successfully',
+        data: response
       });
     } catch (error) {
       if (error instanceof UserAlreadyExistsException) {

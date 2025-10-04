@@ -44,6 +44,7 @@ export class RegisterUseCase {
     // Guardar el usuario
     await this.userRepository.save(user);
 
-    return {}
+    // Retornar respuesta
+    return user;
   }
 }

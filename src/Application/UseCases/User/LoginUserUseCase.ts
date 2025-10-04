@@ -2,7 +2,6 @@ import { UserRepository } from "../../../Domain/Repositories/UserRepository";
 import { PasswordHasher } from "../../../Domain/Services/PasswordHasher";
 import { TokenService } from "../../../Domain/Services/TokenService";
 import { Email } from "../../../Domain/ValueObjects/Email";
-import { Password } from "../../../Domain/ValueObjects/Password";
 import { LoginRequest } from "../../DTOs/Login/LoginRequest";
 import { LoginResponse } from "../../DTOs/Login/LoginResponse";
 import { InvalidPasswordException } from "../../Exceptions/InvalidPasswordException";
@@ -33,7 +32,7 @@ export class LoginUseCase {
     }
 
     const tokenPayload = {
-      id: existingUser._id,
+      _id: existingUser._id,
       username: existingUser.username,
       email: email.getValue(),
     }

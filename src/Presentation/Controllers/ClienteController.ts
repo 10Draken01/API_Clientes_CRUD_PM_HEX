@@ -39,8 +39,7 @@ export class ClienteController {
 
       res.status(200).json({
         success: true,
-        message: 'Cliente con clave ' + response.claveCliente + ' creado correctamente.',
-        data: response,
+        message: 'Cliente con clave ' + response.claveCliente + ' creado correctamente.'
       });
     } catch (error) {
       console.error('Error al crear cliente:', error);
@@ -48,8 +47,7 @@ export class ClienteController {
       if (error instanceof ClienteAlreadyExistsException) {
         res.status(409).json({
           success: false,
-          error: 'Conflict',
-          message: error.message,
+          message: `Conflict: ${error.message}`,
         });
         return;
       }
@@ -57,8 +55,7 @@ export class ClienteController {
       if (error instanceof Error) {
         res.status(400).json({
           success: false,
-          error: 'Bad Request',
-          message: error.message,
+          message: `Bad Request: ${error.message}`,
         });
         return;
       }
@@ -108,8 +105,7 @@ export class ClienteController {
       if (error instanceof Error) {
         res.status(400).json({
           success: false,
-          error: 'Bad Request',
-          message: error.message,
+          message: `Bad Request: ${error.message}`,
         });
         return;
       }
@@ -138,8 +134,7 @@ export class ClienteController {
       if (error instanceof InvalidPageException) {
         res.status(400).json({
           success: false,
-          error: 'Invalid Page',
-          message: error.message,
+          message: `Invalid Page: ${error.message}`,
         });
         return;
       }
@@ -147,8 +142,7 @@ export class ClienteController {
 
         res.status(500).json({
           success: false,
-          error: 'Internal Server Error',
-          message: 'An unexpected error occurred',
+          message: 'Internal Server Error: An unexpected error occurred',
         });
       }
     }

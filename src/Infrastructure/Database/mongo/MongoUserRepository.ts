@@ -1,4 +1,4 @@
-import { Db, Collection, InsertOneResult } from 'mongodb';
+import { Db, Collection } from 'mongodb';
 import { UserRepository } from '../../../Domain/Repositories/UserRepository';
 import { User } from '../../../Domain/Entities/User';
 
@@ -14,12 +14,12 @@ export class MongoUserRepository implements UserRepository {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const document = await this.collection.findOne({ email });
+    const user = await this.collection.findOne({ email });
     
-    if (!document) {
+    if (!user) {
       return null;
     }
 
-    return document;
+    return user;
   }
 }

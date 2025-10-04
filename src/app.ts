@@ -8,9 +8,9 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 80;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017';
-const DB_NAME = process.env.DB_NAME || 'movilesdb';
-const JWT_SECRET = process.env.JWT_SECRET || 'defaultsecret'; 
-const FOLDER_ID = process.env.FOLDER_ID || 'aqui_va_el_id_de_tu_carpeta';
+const DB_NAME = process.env.DB_NAME || 'example_clients_db';
+const JWT_SECRET = process.env.JWT_SECRET || 'secret_secret_secret_secret_secret_secret';
+const FOLDER_ID = process.env.FOLDER_ID || 'example_folder_id';
 // Middleware
 app.use(express.json());
 
