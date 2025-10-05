@@ -8,7 +8,7 @@ import { LoginUseCase } from '../Application/UseCases/User/LoginUserUseCase';
 import { RegisterUseCase } from '../Application/UseCases/User/RegisterUserUseCase';
 import { TokenService } from '../Domain/Services/TokenService';
 import { DatabaseConnection } from '../Infrastructure/Database/mongo/DatabaseConnection';
-import { MongoClienteRepository } from '../Infrastructure/Database/mongo/MongoClienteRepository';
+import { MongoClientRepository } from '../Infrastructure/Database/mongo/MongoClientRepository';
 import { MongoUserRepository } from '../Infrastructure/Database/mongo/MongoUserRepository';
 import { BcryptPasswordHasher } from '../Infrastructure/Services/BcryptPasswordHasher';
 import { DriveApi } from '../Infrastructure/Services/DriveApi';
@@ -23,7 +23,7 @@ export class Container {
   private databaseConnection: DatabaseConnection;
   // Repositories
   private userRepository: MongoUserRepository | null = null;
-  private clienteRepository: MongoClienteRepository | null = null; // Assuming you have a similar repository for Cliente
+  private clienteRepository: MongoClientRepository | null = null; // Assuming you have a similar repository for Cliente
 
   // Use Cases
   private registerUseCase: RegisterUseCase | null = null;
@@ -65,7 +65,7 @@ export class Container {
 
     // Repositories
     this.userRepository = new MongoUserRepository(database);
-    this.clienteRepository = new MongoClienteRepository(database); // Assuming you have a similar repository for Cliente
+    this.clienteRepository = new MongoClientRepository(database); // Assuming you have a similar repository for Cliente
 
     // Use Cases
     this.registerUseCase = new RegisterUseCase(this.userRepository, this.passwordHasher);

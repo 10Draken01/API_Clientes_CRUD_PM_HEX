@@ -1,6 +1,5 @@
-import { Cliente } from "../../../Domain/Entities/Cliente";
 
 export interface DeleteClienteResponse {
+  success: boolean;
   message: string;
-  cliente: Cliente
 }

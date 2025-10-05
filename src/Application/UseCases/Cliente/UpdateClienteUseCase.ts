@@ -1,12 +1,8 @@
-import { Cliente } from "../../../Domain/Entities/Cliente";
-import { ClienteUpdated } from "../../../Domain/Entities/ClienteUpdated";
-import { ClienteRepository } from "../../../Domain/Repositories/ClienteRepository";
+import { ClientUpdated } from "../../../Domain/Entities/ClientUpdated";
+import { ClientRepository } from "../../../Domain/Repositories/ClienteRepository";
 import { DriveService } from "../../../Domain/Services/DriveService";
-import { Celular } from "../../../Domain/ValueObjects/Celular";
 import { CharacterIcon } from "../../../Domain/ValueObjects/CharacterIcon";
 import { ClaveCliente } from "../../../Domain/ValueObjects/ClaveCliente";
-import { Email } from "../../../Domain/ValueObjects/Email";
-import { Nombre } from "../../../Domain/ValueObjects/Nombre";
 import { UpdateClienteRequest } from "../../DTOs/UpdateCliente/UpdateClienteRequest";
 import { UpdateClienteResponse } from "../../DTOs/UpdateCliente/UpdateClienteResponse";
 import { ClienteNotExistsException } from "../../Exceptions/ClienteNotExistsException";
@@ -15,7 +11,7 @@ import { InvalidCharacterIconException } from "../../Exceptions/InvalidCharacter
 
 export class UpdateClienteUseCase {
     constructor(
-        private readonly clienteRepository: ClienteRepository,
+        private readonly clienteRepository: ClientRepository,
         private readonly driveService: DriveService // Asumimos que tienes un servicio para manejar S3
     ) { }
 
@@ -23,7 +19,7 @@ export class UpdateClienteUseCase {
         // Validar datos de entrada usando Value Objects
         const claveCliente = new ClaveCliente(request.claveCliente);
         // Verificar que el cliente no exista
-        const existingCliente = await this.clienteRepository.findByClaveCliente(claveCliente.getValue());
+        const existingCliente = await this.clienteRepository.findByClaveClient(claveCliente.getValue());
 
         if (!existingCliente) {
             throw new ClienteNotExistsException(claveCliente.getValue());
@@ -58,7 +54,7 @@ export class UpdateClienteUseCase {
             }
         }
 
-        const clienteToUpdate: ClienteUpdated | null = {
+        const clienteUpdated = await this.clienteRepository.updateClient({
             claveCliente: claveCliente.getValue(),
             nombre: request.nombre,
             celular: request.celular,
@@ -66,11 +62,7 @@ export class UpdateClienteUseCase {
             characterIcon: request.characterIcon.getValue(), // Mantener el mismo character_icon
             createdAt: existingCliente.createdAt, // Mantener la fecha de creación
             updatedAt: new Date(), // Actualizar la fecha de actualización
-        }
-
-        console.log(`Cliente a actualizar: ${JSON.stringify(clienteToUpdate)}`);
-
-        const clienteUpdated = await this.clienteRepository.updateCliente(clienteToUpdate);
+        });
 
         if (!clienteUpdated) {
             throw new ClienteNotExistsException(claveCliente.getValue());
@@ -78,14 +70,8 @@ export class UpdateClienteUseCase {
 
         // Retornar respuesta
         return {
-            id: clienteUpdated.id,
-            claveCliente: clienteUpdated.claveCliente,
-            nombre: clienteUpdated.nombre,
-            email: clienteUpdated.email,
-            celular: clienteUpdated.celular,
-            characterIcon: clienteUpdated.characterIcon,
-            createdAt: clienteUpdated.createdAt,
-            updatedAt: clienteUpdated.updatedAt,
-        };
+            success: true,
+            message: `Cliente con clave ${claveCliente.getValue()} actualizado correctamente.`,
+        }
     }
 }

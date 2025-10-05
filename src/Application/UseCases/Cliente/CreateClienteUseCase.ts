@@ -1,5 +1,4 @@
-import { Cliente } from "../../../Domain/Entities/Cliente";
-import { ClienteRepository } from "../../../Domain/Repositories/ClienteRepository";
+import { ClientRepository } from "../../../Domain/Repositories/ClienteRepository";
 import { DriveService } from "../../../Domain/Services/DriveService";
 import { Celular } from "../../../Domain/ValueObjects/Celular";
 import { CharacterIcon } from "../../../Domain/ValueObjects/CharacterIcon";
@@ -15,7 +14,7 @@ import { InvalidCharacterIconException } from "../../Exceptions/InvalidCharacter
 
 export class CreateClienteUseCase {
     constructor(
-        private readonly clienteRepository: ClienteRepository,
+        private readonly clienteRepository: ClientRepository,
         private readonly driveService: DriveService 
     ) { }
 
@@ -28,7 +27,7 @@ export class CreateClienteUseCase {
         const email = new Email(request.email);
 
         // Verificar que el cliente no exista
-        const existingCliente = await this.clienteRepository.findByClaveCliente(claveCliente.getValue());
+        const existingCliente = await this.clienteRepository.findByClaveClient(claveCliente.getValue());
 
         if (existingCliente) {
             throw new ClienteAlreadyExistsException(claveCliente.getValue());
@@ -59,8 +58,8 @@ export class CreateClienteUseCase {
 
         const date = new Date();
 
-        const newCliente: Cliente = {
-            id: id.getValue(), // Generar un ID único
+        await this.clienteRepository.createClient({
+            _id: id.getValue(), // Generar un ID único
             claveCliente: claveCliente.getValue(),
             nombre: nombre.getValue(),
             celular: celular.getValue(),
@@ -68,20 +67,12 @@ export class CreateClienteUseCase {
             characterIcon: characterIcon.getValue(), // Asumimos que es un número o string
             createdAt: date, // Fecha de creación
             updatedAt: date, // Fecha de actualización
-        }
-
-        await this.clienteRepository.createCliente(newCliente);
+        });
 
         // Retornar respuesta
         return {
-            id: newCliente.id,
-            claveCliente: newCliente.claveCliente,
-            nombre: newCliente.nombre,
-            email: newCliente.email,
-            celular: newCliente.celular,
-            characterIcon: newCliente.characterIcon,
-            createdAt: newCliente.createdAt || new Date(),
-            updatedAt: newCliente.updatedAt || new Date(),
+            success: true,
+            message: 'Cliente creado exitosamente',
         };
     }
 }

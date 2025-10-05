@@ -1,5 +1,4 @@
-import { ClienteRepository } from "../../../Domain/Repositories/ClienteRepository";
-import { DriveService } from "../../../Domain/Services/DriveService";
+import { ClientRepository } from "../../../Domain/Repositories/ClienteRepository";
 import { Page } from "../../../Domain/ValueObjects/Page";
 import { GetPageClientesRequest } from "../../DTOs/GetPageClientes/GetPageClientesRequest";
 import { GetPageClientesResponse } from "../../DTOs/GetPageClientes/GetPageClientesResponse";
@@ -7,7 +6,7 @@ import { GetPageClientesResponse } from "../../DTOs/GetPageClientes/GetPageClien
 
 export class GetPageClientesUseCase {
     constructor(
-        private readonly clienteRepository: ClienteRepository
+        private readonly clienteRepository: ClientRepository
     ) { }
 
     async execute(request: GetPageClientesRequest): Promise<GetPageClientesResponse> {
@@ -16,11 +15,13 @@ export class GetPageClientesUseCase {
         const page = new Page(request.page, totalPages);
 
         // Obtener la lista de clientes con paginación
-        const { clientes, totalDocuments } = await this.clienteRepository.getPageClientes(page.getValue());
+        const { clients, totalClients } = await this.clienteRepository.getPageClients(page.getValue());
         // Retornar respuesta
         return {
-            clientes: clientes,
-            totalDocuments: totalDocuments,
+            success: true,
+            message: `Página ${page.getValue()} de clientes obtenida correctamente.`,
+            clients: clients,
+            totalClients: totalClients,
         };
     }
 }

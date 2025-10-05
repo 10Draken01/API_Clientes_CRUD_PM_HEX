@@ -40,8 +40,7 @@ export class UserController {
       if (error instanceof Error) {
         res.status(400).json({
           success: false,
-          error: 'Bad Request',
-          message: error.message
+          message: `Bad Request: ${error.message}`
         });
         return;
       }
@@ -65,8 +64,7 @@ export class UserController {
 
       res.status(200).json({
         success: true,
-        message: 'User registered successfully',
-        data: response
+        message: 'Registered successfully',
       });
     } catch (error) {
       if (error instanceof UserAlreadyExistsException) {

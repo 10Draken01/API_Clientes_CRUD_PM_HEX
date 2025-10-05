@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { request, Request, Response } from 'express';
 import { CreateClienteUseCase } from '../../Application/UseCases/Cliente/CreateClienteUseCase';
 import { CreateClienteRequest } from '../../Application/DTOs/CreateCliente/CreateClienteRequest';
 import { ClienteAlreadyExistsException } from '../../Application/Exceptions/ClienteAlreadyExistsException';
@@ -8,6 +8,8 @@ import { InvalidPageException } from '../../Application/Exceptions/InvalidPageEx
 import { GetClienteUseCase } from '../../Application/UseCases/Cliente/GetClienteUseCase';
 import { ClienteNotExistsException } from '../../Application/Exceptions/ClienteNotExistsException';
 import { DeleteClienteUseCase } from '../../Application/UseCases/Cliente/DeleteClienteUseCase';
+import { InexistPagesException } from '../../Application/Exceptions/InexistPagesException';
+import { InvalidEmailError } from '../../Application/Exceptions/InvalidEmailError';
 
 export class ClienteController {
   constructor(
@@ -35,14 +37,18 @@ export class ClienteController {
         console.log(`Archivo recibido: ${req.file.originalname} (${req.file.mimetype}, ${req.file.size} bytes)`);
       }
 
-      const response = await this.createClienteUseCase.execute(request);
-
-      res.status(200).json({
-        success: true,
-        message: 'Cliente con clave ' + response.claveCliente + ' creado correctamente.'
-      });
+      res.status(200).json(
+        await this.createClienteUseCase.execute(request)
+      );
     } catch (error) {
       console.error('Error al crear cliente:', error);
+      if (error instanceof InvalidEmailError) {
+        res.status(400).json({
+          success: false,
+          message: `Bad Request: ${error.message}`,
+        });
+        return;
+      }
 
       if (error instanceof ClienteAlreadyExistsException) {
         res.status(409).json({
@@ -62,8 +68,7 @@ export class ClienteController {
 
       res.status(500).json({
         success: false,
-        error: 'Internal Server Error',
-        message: 'An unexpected error occurred',
+        message: 'Internal Server Error: An unexpected error occurred',
       });
     }
   }
@@ -84,20 +89,16 @@ export class ClienteController {
         console.log(`Archivo recibido: ${req.file.originalname} (${req.file.mimetype}, ${req.file.size} bytes)`);
       }
 
-      const response = await this.updateClienteUseCase.execute(request);
-
-      res.status(200).json({
-        success: true,
-        data: response,
-      });
+      res.status(200).json(
+        await this.updateClienteUseCase.execute(request)
+      );
     } catch (error) {
       console.error('Error al actualizar cliente:', error);
 
       if (error instanceof ClienteAlreadyExistsException) {
         res.status(409).json({
           success: false,
-          error: 'Conflict',
-          message: error.message,
+          message: `Conflict: ${error.message}`,
         });
         return;
       }
@@ -112,8 +113,7 @@ export class ClienteController {
 
       res.status(500).json({
         success: false,
-        error: 'Internal Server Error',
-        message: 'An unexpected error occurred',
+        message: 'Internal Server Error: An unexpected error occurred',
       });
     }
   }
@@ -122,14 +122,19 @@ export class ClienteController {
     try {
       const page = parseInt(req.params.page as string) || 1; // Obtener el número de página desde la query, por defecto 1
 
-      const response = await this.getPageClientesUseCase.execute({ page });
-
-      res.status(200).json({
-        success: true,
-        data: response,
-      });
+      res.status(200).json(
+        await this.getPageClientesUseCase.execute({ page })
+      );
     } catch (error) {
       console.error('Error al obtener página de clientes:', error);
+
+      if( error instanceof InexistPagesException) {
+        res.status(404).json({
+          success: false,
+          message: `Not Found: ${error.message}`,
+        });
+        return;
+      }
 
       if (error instanceof InvalidPageException) {
         res.status(400).json({
@@ -152,59 +157,49 @@ export class ClienteController {
     try {
       const claveCliente = req.params.claveCliente; // Asumiendo que la clave del cliente se pasa como parámetro de ruta
 
-      const response = await this.getClienteUseCase.execute({ claveCliente });
-
-      res.status(200).json({
-        success: true,
-        message: `Cliente con clave ${claveCliente} obtenido correctamente.`,
-        data: response,
-      });
+      res.status(200).json(
+        await this.getClienteUseCase.execute({ claveCliente })
+      );
     } catch (error) {
       console.error('Error al obtener cliente:', error);
 
       if (error instanceof ClienteNotExistsException) {
         res.status(404).json({
           success: false,
-          error: 'Not Found',
-          message: error.message,
+          message: `Not Found: ${error.message}`,
         });
         return;
       }
 
       res.status(500).json({
         success: false,
-        error: 'Internal Server Error',
-        message: 'An unexpected error occurred',
+        message: 'Internal Server Error: An unexpected error occurred',
       });
     }
   }
 
-  deleteCliente(req: Request, res: Response): void {
+  async deleteCliente(req: Request, res: Response): Promise<void> {
     try{
       const claveCliente = req.params.claveCliente; 
 
-      this.deleteClienteUseCase.execute({ claveCliente });
 
-      res.status(200).json({
-        success: true,
-        message: `Cliente con clave ${claveCliente} eliminado correctamente.`,
-      });
+      res.status(200).json(
+        await this.deleteClienteUseCase.execute({ claveCliente })
+      );
     } catch (error) {
       console.error('Error al obtener cliente:', error);
 
       if (error instanceof ClienteNotExistsException) {
         res.status(404).json({
           success: false,
-          error: 'Not Found',
-          message: error.message,
+          message: `Not Found: ${error.message}`,
         });
         return;
       }
 
       res.status(500).json({
         success: false,
-        error: 'Internal Server Error',
-        message: 'An unexpected error occurred',
+        message: 'Internal Server Error: An unexpected error occurred',
       });
     }
   }

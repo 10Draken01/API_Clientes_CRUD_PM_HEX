@@ -1,6 +1,8 @@
-import { Cliente } from "../../../Domain/Entities/Cliente";
+import { Client } from "../../../Domain/Entities/Client";
 
 export interface GetPageClientesResponse {
-  clientes: Cliente[];
-  totalDocuments: number;
+  success: boolean;
+  message: string;
+  clients: Client[];
+  totalClients: number;
 }

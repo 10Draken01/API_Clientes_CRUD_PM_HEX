@@ -1,7 +1,7 @@
 import { CharacterIcontype } from "./CharacterIcontype";
 
 
-export interface ClienteUpdated {
+export interface ClientUpdated {
   claveCliente: string;
   nombre?: string;
   celular?: string;
