@@ -1,5 +1,5 @@
-import { ClientRepository } from "../../../Domain/Repositories/ClienteRepository";
-import { DriveService } from "../../../Domain/Services/DriveService";
+import { ImageService } from "../../../Domain/Services/ImageService";
+import { ClientRepository } from "../../../Domain/Repositories/ClientRepository";
 import { ClaveCliente } from "../../../Domain/ValueObjects/ClaveCliente";
 import { DeleteClienteRequest } from "../../DTOs/DeleteCliente/DeleteClienteRequest";
 import { DeleteClienteResponse } from "../../DTOs/DeleteCliente/DeleteClienteResponse";
@@ -9,7 +9,7 @@ import { ClienteNotExistsException } from "../../Exceptions/ClienteNotExistsExce
 export class DeleteClienteUseCase {
     constructor(
         private readonly clienteRepository: ClientRepository,
-        private readonly driveService: DriveService 
+        private readonly imageService: ImageService
     ) { }
 
     async execute(request: DeleteClienteRequest): Promise<DeleteClienteResponse> {
@@ -26,7 +26,7 @@ export class DeleteClienteUseCase {
         // Si el cliente tiene un characterIcon, eliminarlo del servicio de Drive
         if (cliente.characterIcon && typeof cliente.characterIcon === 'object' && 'id' in cliente.characterIcon) {
             // Asumimos que characterIcon es un objeto con un id
-            await this.driveService.deleteImageFromDrive(cliente.characterIcon.id);
+            await this.imageService.deleteImage(cliente.characterIcon.id);
         }
 
         // Retornar respuesta

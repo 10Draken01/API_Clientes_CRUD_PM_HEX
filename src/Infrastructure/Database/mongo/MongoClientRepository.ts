@@ -1,6 +1,7 @@
 import { Db, Collection } from 'mongodb';
-import { ClientRepository } from '../../../Domain/Repositories/ClienteRepository';
-import { Client } from '@/src/Domain/Entities/Client';
+import { ClientRepository } from '../../../Domain/Repositories/ClientRepository';
+import { Client } from '../../../Domain/Entities/Client';
+import { ClientUpdated } from '../../../Domain/Entities/ClientUpdated';
 
 
 export class MongoClientRepository implements ClientRepository {
@@ -21,8 +22,8 @@ export class MongoClientRepository implements ClientRepository {
     }
   }
 
-  async findByClaveClient(clave_cliente: string): Promise<Client | null> {
-    return await this.collection.findOne({ clave_cliente: clave_cliente });
+  async findByClaveClient(claveCliente: string): Promise<Client | null> {
+    return await this.collection.findOne({ claveCliente: claveCliente });
   }
 
   async deleteByClaveClient(claveCliente: string): Promise<Client | null> {
@@ -35,7 +36,7 @@ export class MongoClientRepository implements ClientRepository {
   }
 
   // MÉTODO UPDATE - Solo actualiza campos con valores válidos
-  async updateClient(client: Client): Promise<Client | null> {
+  async updateClient(client: ClientUpdated): Promise<Client | null> {
     try {
       // Filtrar solo campos que no estén vacíos, null o undefined
       const updateFields: any = {

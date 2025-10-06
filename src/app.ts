@@ -10,7 +10,10 @@ const PORT = process.env.PORT || 80;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017';
 const DB_NAME = process.env.DB_NAME || 'example_clients_db';
 const JWT_SECRET = process.env.JWT_SECRET || 'secret_secret_secret_secret_secret_secret';
-const FOLDER_ID = process.env.FOLDER_ID || 'example_folder_id';
+
+const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'your_cloud_name';
+const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY || 'your_api_key';
+const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || 'your_api_secret';
 // Middleware
 app.use(express.json());
 
@@ -27,7 +30,9 @@ export async function bootstrap() {
       MONGO_URI, 
       DB_NAME, 
       JWT_SECRET,
-      FOLDER_ID 
+      CLOUDINARY_CLOUD_NAME,
+      CLOUDINARY_API_KEY,
+      CLOUDINARY_API_SECRET
     );
 
     // Setup routes WITHOUT global validation middleware
@@ -35,7 +40,7 @@ export async function bootstrap() {
     app.use('/api/users', userRoutes.getRouter());
 
     const clienteRoutes = container.getClienteRoutes();
-    app.use('/api/clientes', clienteRoutes.getRouter());
+    app.use('/api/clients', clienteRoutes.getRouter());
 
     // Global error handler
     app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {

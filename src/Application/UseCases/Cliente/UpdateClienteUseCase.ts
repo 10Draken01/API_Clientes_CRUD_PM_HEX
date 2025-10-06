@@ -1,6 +1,5 @@
-import { ClientUpdated } from "../../../Domain/Entities/ClientUpdated";
-import { ClientRepository } from "../../../Domain/Repositories/ClienteRepository";
-import { DriveService } from "../../../Domain/Services/DriveService";
+import { ImageService } from "../../../Domain/Services/ImageService";
+import { ClientRepository } from "../../../Domain/Repositories/ClientRepository";
 import { CharacterIcon } from "../../../Domain/ValueObjects/CharacterIcon";
 import { ClaveCliente } from "../../../Domain/ValueObjects/ClaveCliente";
 import { UpdateClienteRequest } from "../../DTOs/UpdateCliente/UpdateClienteRequest";
@@ -12,7 +11,7 @@ import { InvalidCharacterIconException } from "../../Exceptions/InvalidCharacter
 export class UpdateClienteUseCase {
     constructor(
         private readonly clienteRepository: ClientRepository,
-        private readonly driveService: DriveService // Asumimos que tienes un servicio para manejar S3
+        private readonly imageService: ImageService
     ) { }
 
     async execute(request: UpdateClienteRequest): Promise<UpdateClienteResponse> {
@@ -27,11 +26,12 @@ export class UpdateClienteUseCase {
 
         if (request.characterIcon) {
             // Verificar que character_icon sea un file
-            if (typeof existingCliente.characterIcon === "object") {
-                // Borrar la imagen de drive si es un objeto
-                if (existingCliente.characterIcon.id) {
-                    await this.driveService.deleteImageFromDrive(existingCliente.characterIcon.id);
-                }
+            if (
+                existingCliente.characterIcon &&
+                typeof existingCliente.characterIcon === 'object' &&
+                'id' in existingCliente.characterIcon
+            ) {
+                await this.imageService.deleteImage(existingCliente.characterIcon.id);
             }
             if (typeof request.characterIcon === 'string') {
                 // Convertir a Number y que sea del 0 al 9 1 caracter
@@ -40,16 +40,16 @@ export class UpdateClienteUseCase {
                     throw new InvalidCharacterIconException(request.characterIcon);
                 }
                 request.characterIcon = new CharacterIcon(Number(request.characterIcon));
-            } else if(typeof request.characterIcon === 'number'){
+            } else if (typeof request.characterIcon === 'number') {
                 if (request.characterIcon < 0 || request.characterIcon > 9) {
                     throw new InvalidCharacterIconException(request.characterIcon.toString());
                 }
                 request.characterIcon = new CharacterIcon(request.characterIcon);
             } else {
-                const { fileId, imageUrl } = await this.driveService.uploadImageToDrive(request.characterIcon, claveCliente.getValue());
+                const { id, url } = await this.imageService.uploadImage(request.characterIcon, claveCliente.getValue());
                 request.characterIcon = new CharacterIcon({
-                    id: fileId,
-                    url: imageUrl
+                    id,
+                    url
                 });
             }
         }

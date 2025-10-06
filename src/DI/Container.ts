@@ -6,12 +6,13 @@ import { GetPageClientesUseCase } from '../Application/UseCases/Cliente/GetPageC
 import { UpdateClienteUseCase } from '../Application/UseCases/Cliente/UpdateClienteUseCase';
 import { LoginUseCase } from '../Application/UseCases/User/LoginUserUseCase';
 import { RegisterUseCase } from '../Application/UseCases/User/RegisterUserUseCase';
+import { ImageService } from '../Domain/Services/ImageService';
 import { TokenService } from '../Domain/Services/TokenService';
+import { CloudinaryService } from '../Infrastructure/Cloudinary/CloudinaryService';
 import { DatabaseConnection } from '../Infrastructure/Database/mongo/DatabaseConnection';
 import { MongoClientRepository } from '../Infrastructure/Database/mongo/MongoClientRepository';
 import { MongoUserRepository } from '../Infrastructure/Database/mongo/MongoUserRepository';
 import { BcryptPasswordHasher } from '../Infrastructure/Services/BcryptPasswordHasher';
-import { DriveApi } from '../Infrastructure/Services/DriveApi';
 import { JwtTokenService } from '../Infrastructure/Services/JwtTokenService';
 import { ClienteController } from '../Presentation/Controllers/ClienteController';
 import { UserController } from '../Presentation/Controllers/UserController';
@@ -44,6 +45,8 @@ export class Container {
   private passwordHasher: BcryptPasswordHasher | null = null;
   private tokenService: TokenService | null = null;
 
+  private imageService: ImageService | null = null;
+
   private constructor() {
     this.databaseConnection = new DatabaseConnection();
   }
@@ -55,9 +58,20 @@ export class Container {
     return Container.instance;
   }
 
-  async initialize(connectionString: string, databaseName: string, secret: string, folderId: string): Promise<void> {
+  async initialize(
+    connectionString: string, 
+    databaseName: string, 
+    secret: string, 
+    cloud_name: string, 
+    api_key: string, 
+    api_secret: string
+  ): Promise<void> {
     const database = await this.databaseConnection.connect(connectionString, databaseName);
-    const driveService = new DriveApi(folderId)
+    this.imageService = new CloudinaryService(
+      cloud_name,
+      api_key,
+      api_secret
+    );
 
     // Services
     this.passwordHasher = new BcryptPasswordHasher();
@@ -72,11 +86,11 @@ export class Container {
     this.loginUseCase = new LoginUseCase(this.userRepository, this.passwordHasher, this.tokenService);
     this.createClienteUseCase = new CreateClienteUseCase(
       this.clienteRepository,
-      driveService
+      this.imageService
     );
     this.updateClienteUseCase = new UpdateClienteUseCase(
       this.clienteRepository,
-      driveService
+      this.imageService
     );
     this.getPageClientesUseCase = new GetPageClientesUseCase(
       this.clienteRepository
@@ -86,7 +100,7 @@ export class Container {
     );
     this.deleteClienteUseCase = new DeleteClienteUseCase(
       this.clienteRepository,
-      driveService
+      this.imageService
     );
 
 

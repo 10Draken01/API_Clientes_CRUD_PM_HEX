@@ -7,7 +7,7 @@ export interface Client {
   nombre: string;
   celular: string;
   email: string;
-  characterIcon: number | CharacterIcontype;
+  characterIcon: number | CharacterIcontype | Express.Multer.File;
   createdAt: Date;
   updatedAt: Date;
 }

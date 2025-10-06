@@ -78,17 +78,16 @@ export const validateCreateCliente = (req: Request, res: Response, next: NextFun
 
   const { claveCliente, nombre, celular, email, characterIcon } = req.body;
 
-  if (!claveCliente || !nombre || !celular || !email || !characterIcon) {
+  if (!claveCliente || !nombre || !celular || !email) {
     // Respuesta de error con campos faltantes y especificando la ruta y un ejemplo de uso
     res.status(400).json({
       success: false,
-      message: 'Todos los campos claveCliente, nombre, celular, email y characterIcon son requeridos en el cuerpo de la solicitud.',
+      message: 'Todos los campos claveCliente, nombre, celular y email son requeridos en el cuerpo de la solicitud.',
       missingFields: [
         !claveCliente ? 'claveCliente' : undefined,
         !nombre ? 'nombre' : undefined,
         !celular ? 'celular' : undefined,
-        !email ? 'email' : undefined,
-        !characterIcon ? 'characterIcon' : undefined
+        !email ? 'email' : undefined
       ].filter(Boolean)
     });
     return;

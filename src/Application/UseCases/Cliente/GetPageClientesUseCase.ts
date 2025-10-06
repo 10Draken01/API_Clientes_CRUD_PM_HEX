@@ -1,4 +1,4 @@
-import { ClientRepository } from "../../../Domain/Repositories/ClienteRepository";
+import { ClientRepository } from "../../../Domain/Repositories/ClientRepository";
 import { Page } from "../../../Domain/ValueObjects/Page";
 import { GetPageClientesRequest } from "../../DTOs/GetPageClientes/GetPageClientesRequest";
 import { GetPageClientesResponse } from "../../DTOs/GetPageClientes/GetPageClientesResponse";
