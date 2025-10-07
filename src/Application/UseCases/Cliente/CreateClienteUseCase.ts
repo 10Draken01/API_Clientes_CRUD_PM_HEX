@@ -32,20 +32,16 @@ export class CreateClienteUseCase {
       throw new ClienteAlreadyExistsException(claveCliente.getValue());
     }
 
-    let characterIcon: CharacterIcontype | number = 0;
+    let characterIcon: CharacterIcon =  new CharacterIcon(request.characterIcon); // Valor por defecto
 
     // Subir imagen si se incluye un archivo en el request
-    if (request.characterIcon && typeof request.characterIcon === 'object' && 'buffer' in request.characterIcon) {
-      const file = request.characterIcon as Express.Multer.File;
+    if (characterIcon.type === 'File') {
+      const file = characterIcon.getValue() as Express.Multer.File;
       const { id: imgId, url }: CharacterIcontype = await this.imageService.uploadImage(
         file,
         claveCliente.getValue()
       );
-      characterIcon = { id: imgId, url };
-    } else if (typeof request.characterIcon === 'number') {
-      characterIcon = request.characterIcon;
-    } else {
-      throw new InvalidCharacterIconException('El valor de characterIcon debe ser un archivo (buffer) o un número válido.');
+      characterIcon = new CharacterIcon({ id: imgId, url });
     }
 
     const date = new Date();
@@ -56,7 +52,7 @@ export class CreateClienteUseCase {
       nombre: nombre.getValue(),
       celular: celular.getValue(),
       email: email.getValue(),
-      characterIcon,
+      characterIcon: characterIcon.getValue(),
       createdAt: date,
       updatedAt: date,
     });

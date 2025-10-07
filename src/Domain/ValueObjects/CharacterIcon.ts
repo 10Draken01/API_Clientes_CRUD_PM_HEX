@@ -2,7 +2,7 @@ import { CharacterIcontype } from "../Entities/CharacterIcontype";
 
 export class CharacterIcon {
   private readonly value: number | CharacterIcontype | Express.Multer.File;
-  public readonly iconKind: 'Icon' | 'URL' | 'File';
+  public readonly type: 'Icon' | 'URL' | 'File';
 
   constructor(characterIcon: string | number | CharacterIcontype | Express.Multer.File) {
     if (typeof characterIcon === 'number') {
@@ -10,7 +10,7 @@ export class CharacterIcon {
         throw new Error('CharacterIcon number must be between 0 and 9.');
       }
       this.value = characterIcon;
-      this.iconKind = 'Icon';
+      this.type = 'Icon';
     } 
     else if (typeof characterIcon === 'string') {
       const regexNumeric09 = /^[0-9]{1}$/;
@@ -18,22 +18,22 @@ export class CharacterIcon {
         throw new Error('CharacterIcon string must be a single digit (0-9).');
       }
       this.value = parseInt(characterIcon, 10);
-      this.iconKind = 'Icon';
+      this.type = 'Icon';
     } 
     else if (typeof characterIcon === 'object' && characterIcon !== null && 'id' in characterIcon && 'url' in characterIcon) {
       this.value = characterIcon;
-      this.iconKind = 'URL';
+      this.type = 'URL';
     } 
     else if (characterIcon && typeof characterIcon === 'object' && 'path' in characterIcon) {
       // Detecta que es un archivo Multer
       this.value = characterIcon;
-      this.iconKind = 'File';
+      this.type = 'File';
     } 
     else {
       console.error('Invalid CharacterIcon value:', characterIcon, typeof characterIcon);
       throw new Error('Invalid CharacterIcon type.');
     }
-    console.log(`CharacterIcon created with kind: ${this.iconKind}`);
+    console.log(`CharacterIcon created with kind: ${this.type}`);
     console.log('CharacterIcon value:', this.value);
   }
 
