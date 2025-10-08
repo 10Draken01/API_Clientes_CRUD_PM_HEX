@@ -19,22 +19,29 @@ export class CharacterIcon {
       }
       this.value = parseInt(characterIcon, 10);
       this.type = 'Icon';
-    } 
-    else if (typeof characterIcon === 'object' && characterIcon !== null && 'id' in characterIcon && 'url' in characterIcon) {
-      this.value = characterIcon;
+    }
+    else if (
+      characterIcon && 
+      typeof characterIcon === 'object' && 
+      'buffer' in characterIcon && 
+      'mimetype' in characterIcon &&
+      'fieldname' in characterIcon
+    ) {
+      this.value = characterIcon as Express.Multer.File;
+      this.type = 'File';
+    }
+    else if (
+      characterIcon && 
+      typeof characterIcon === 'object' && 
+      'id' in characterIcon && 
+      'url' in characterIcon
+    ) {
+      this.value = characterIcon as CharacterIcontype;
       this.type = 'URL';
     } 
-    else if (characterIcon && typeof characterIcon === 'object' && 'path' in characterIcon) {
-      // Detecta que es un archivo Multer
-      this.value = characterIcon;
-      this.type = 'File';
-    } 
     else {
-      console.error('Invalid CharacterIcon value:', characterIcon, typeof characterIcon);
       throw new Error('Invalid CharacterIcon type.');
     }
-    console.log(`CharacterIcon created with kind: ${this.type}`);
-    console.log('CharacterIcon value:', this.value);
   }
 
   getValue(): number | CharacterIcontype | Express.Multer.File {

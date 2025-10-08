@@ -77,6 +77,7 @@ export const validateCreateCliente = (req: Request, res: Response, next: NextFun
   }
 
   const { claveCliente, nombre, celular, email } = req.body;
+  // mostrar el body en consola para debug
 
   if (!claveCliente || !nombre || !celular || !email) {
     // Respuesta de error con campos faltantes y especificando la ruta y un ejemplo de uso
