@@ -1,12 +1,12 @@
+import { ClientEntity } from "../Entities/ClientEntity";
 
-import { Client } from "../Entities/Client";
-import { ClientUpdated } from "../Entities/ClientUpdated";
+
 
 export interface ClientRepository {
-  createClient(client: Client): Promise<void>;
-  findByClaveClient(clave_client: string): Promise<Client | null>;
-  deleteByClaveClient(clave_client: string): Promise<Client | null>;
-  updateClient(client: ClientUpdated): Promise<Client | null>;
-  getPageClients(page: number): Promise<{ clients: Client[]; totalClients: number }>;
+  createClient(client: ClientEntity): Promise<void>;
+  findByClientKey(clientKey: string): Promise<ClientEntity | null>;
+  deleteByClientKey(clientKey: string): Promise<ClientEntity | null>;
+  updateClient(clientKey: string, name?: string, phone?: string, email?: string, characterIcon?: string): Promise<ClientEntity | null>;
+  getPageClients(page: number): Promise<{ clients: ClientEntity[]; totalClients: number }>;
   getTotalPages(): Promise<number>;
 }

@@ -1,5 +1,5 @@
 import { InsertOneResult } from "mongodb";
-import { User } from "../Entities/User";
+import { User } from "../Entities/UserEntity";
 
 export interface UserRepository {
   save(user: User): Promise<void>;

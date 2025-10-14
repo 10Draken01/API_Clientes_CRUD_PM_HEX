@@ -1,6 +1,6 @@
 import { Db, Collection } from 'mongodb';
 import { UserRepository } from '../../../Domain/Repositories/UserRepository';
-import { User } from '../../../Domain/Entities/User';
+import { User } from '../../../Domain/Entities/UserEntity';
 
 export class MongoUserRepository implements UserRepository {
   private readonly collection: Collection<User>;

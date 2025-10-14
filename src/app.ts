@@ -13,7 +13,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secret_secret_secret_secret_secret
 
 const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'your_cloud_name';
 const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY || 'your_api_key';
-const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || 'your_api_secret';
+const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || 'your_api_secret'; 
 // Middleware
 app.use(express.json());
 

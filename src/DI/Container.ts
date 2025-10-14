@@ -1,9 +1,9 @@
 
-import { CreateClienteUseCase } from '../Application/UseCases/Cliente/CreateClienteUseCase';
-import { DeleteClienteUseCase } from '../Application/UseCases/Cliente/DeleteClienteUseCase';
-import { GetClienteUseCase } from '../Application/UseCases/Cliente/GetClienteUseCase';
-import { GetPageClientesUseCase } from '../Application/UseCases/Cliente/GetPageClientesUseCase';
-import { UpdateClienteUseCase } from '../Application/UseCases/Cliente/UpdateClienteUseCase';
+import { CreateClienteUseCase } from '../Application/UseCases/Client/CreateClientUseCase';
+import { DeleteClienteUseCase } from '../Application/UseCases/Client/DeleteClientUseCase';
+import { GetClienteUseCase } from '../Application/UseCases/Client/GetClientUseCase';
+import { GetPageClientesUseCase } from '../Application/UseCases/Client/GetPageClientsUseCase';
+import { UpdateClienteUseCase } from '../Application/UseCases/Client/UpdateClientUseCase';
 import { LoginUseCase } from '../Application/UseCases/User/LoginUserUseCase';
 import { RegisterUseCase } from '../Application/UseCases/User/RegisterUserUseCase';
 import { ImageService } from '../Domain/Services/ImageService';
@@ -12,11 +12,11 @@ import { CloudinaryService } from '../Infrastructure/Cloudinary/CloudinaryServic
 import { DatabaseConnection } from '../Infrastructure/Database/mongo/DatabaseConnection';
 import { MongoClientRepository } from '../Infrastructure/Database/mongo/MongoClientRepository';
 import { MongoUserRepository } from '../Infrastructure/Database/mongo/MongoUserRepository';
-import { BcryptPasswordHasher } from '../Infrastructure/Services/BcryptPasswordHasher';
+import { BcryptService } from '../Infrastructure/Services/BcryptService';
 import { JwtTokenService } from '../Infrastructure/Services/JwtTokenService';
-import { ClienteController } from '../Presentation/Controllers/ClienteController';
+import { ClienteController } from '../Presentation/Controllers/ClientController';
 import { UserController } from '../Presentation/Controllers/UserController';
-import { ClienteRoutes } from '../Presentation/Routes/ClienteRoutes';
+import { ClienteRoutes } from '../Presentation/Routes/ClientRoutes';
 import { UserRoutes } from '../Presentation/Routes/UserRoutes';
 
 export class Container {
@@ -42,7 +42,7 @@ export class Container {
   private clienteRoutes: ClienteRoutes | null = null;
 
   // Services
-  private passwordHasher: BcryptPasswordHasher | null = null;
+  private encryptService: BcryptService | null = null;
   private tokenService: TokenService | null = null;
 
   private imageService: ImageService | null = null;
@@ -74,7 +74,7 @@ export class Container {
     );
 
     // Services
-    this.passwordHasher = new BcryptPasswordHasher();
+    this.encryptService = new BcryptService();
     this.tokenService = new JwtTokenService(secret, 3900);
 
     // Repositories
@@ -82,8 +82,8 @@ export class Container {
     this.clienteRepository = new MongoClientRepository(database); // Assuming you have a similar repository for Cliente
 
     // Use Cases
-    this.registerUseCase = new RegisterUseCase(this.userRepository, this.passwordHasher);
-    this.loginUseCase = new LoginUseCase(this.userRepository, this.passwordHasher, this.tokenService);
+    this.registerUseCase = new RegisterUseCase(this.userRepository, this.encryptService);
+    this.loginUseCase = new LoginUseCase(this.userRepository, this.encryptService, this.tokenService);
     this.createClienteUseCase = new CreateClienteUseCase(
       this.clienteRepository,
       this.imageService

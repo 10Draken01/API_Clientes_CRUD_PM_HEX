@@ -1,4 +1,4 @@
-import { CharacterIcontype } from "../../../Domain/Entities/CharacterIcontype";
+import { CharacterIcontype } from "../../../Domain/Types/CharacterIcontype";
 
 export interface GetClienteResponse {
   success: boolean;

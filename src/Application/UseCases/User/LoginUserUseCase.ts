@@ -1,17 +1,17 @@
+import { EncryptService } from "@/src/Domain/Services/EncryptService";
 import { UserRepository } from "../../../Domain/Repositories/UserRepository";
-import { PasswordHasher } from "../../../Domain/Services/PasswordHasher";
 import { TokenService } from "../../../Domain/Services/TokenService";
-import { Email } from "../../../Domain/ValueObjects/Email";
+import { Email } from "../../../Domain/ValueObjects/EmailVO";
 import { LoginRequest } from "../../DTOs/Login/LoginRequest";
 import { LoginResponse } from "../../DTOs/Login/LoginResponse";
-import { InvalidPasswordException } from "../../Exceptions/InvalidPasswordException";
-import { UserNotExistsException } from "../../Exceptions/UserNotExistsException";
+import { InvalidPasswordException } from "../../../Domain/Exceptions/InvalidPasswordException";
+import { UserNotExistsException } from "../../../Domain/Exceptions/UserNotExistsException";
 
 
 export class LoginUseCase {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly passwordHasher: PasswordHasher, // Asegúrate de inyectar un hasher de contraseñas
+    private readonly encryptService: EncryptService, // Asegúrate de inyectar un hasher de contraseñas
     private readonly tokenService: TokenService // Aquí deberías inyectar un servicio de generación de tokens JWT
   ) {}
 
@@ -25,7 +25,7 @@ export class LoginUseCase {
       throw new UserNotExistsException(email.getValue());
     }
 
-    const passwordValidated = await this.passwordHasher.compare(request.password, existingUser.password);
+    const passwordValidated = await this.encryptService.compare(request.password, existingUser.password);
 
     if (!passwordValidated) {
       throw new InvalidPasswordException('Contraseña incorrecta');
