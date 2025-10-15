@@ -1,51 +1,52 @@
 
-import { CreateClienteUseCase } from '../Application/UseCases/Client/CreateClientUseCase';
-import { DeleteClienteUseCase } from '../Application/UseCases/Client/DeleteClientUseCase';
-import { GetClienteUseCase } from '../Application/UseCases/Client/GetClientUseCase';
-import { GetPageClientesUseCase } from '../Application/UseCases/Client/GetPageClientsUseCase';
-import { UpdateClienteUseCase } from '../Application/UseCases/Client/UpdateClientUseCase';
-import { LoginUseCase } from '../Application/UseCases/User/LoginUserUseCase';
-import { RegisterUseCase } from '../Application/UseCases/User/RegisterUserUseCase';
-import { ImageService } from '../Domain/Services/ImageService';
-import { TokenService } from '../Domain/Services/TokenService';
-import { CloudinaryService } from '../Infrastructure/Cloudinary/CloudinaryService';
-import { DatabaseConnection } from '../Infrastructure/Database/mongo/DatabaseConnection';
-import { MongoClientRepository } from '../Infrastructure/Database/mongo/MongoClientRepository';
-import { MongoUserRepository } from '../Infrastructure/Database/mongo/MongoUserRepository';
-import { BcryptService } from '../Infrastructure/Services/BcryptService';
-import { JwtTokenService } from '../Infrastructure/Services/JwtTokenService';
-import { ClienteController } from '../Presentation/Controllers/ClientController';
-import { UserController } from '../Presentation/Controllers/UserController';
-import { ClienteRoutes } from '../Presentation/Routes/ClientRoutes';
-import { UserRoutes } from '../Presentation/Routes/UserRoutes';
+import { CreateClientUseCase } from "../Application/UseCases/Client/CreateClientUseCase";
+import { DeleteClientUseCase } from "../Application/UseCases/Client/DeleteClientUseCase";
+import { GetClientUseCase } from "../Application/UseCases/Client/GetClientUseCase";
+import { GetPageClientsUseCase } from "../Application/UseCases/Client/GetPageClientsUseCase";
+import { UpdateClientUseCase } from "../Application/UseCases/Client/UpdateClientUseCase";
+import { LoginUseCase } from "../Application/UseCases/User/LoginUserUseCase";
+import { RegisterUseCase } from "../Application/UseCases/User/RegisterUserUseCase";
+import { ImageRepository } from "../Domain/Repository/ImageRepository";
+import { TokenRepository } from "../Domain/Repository/TokenRepository";
+import { CloudinaryService } from "../Infrastructure/Cloudinary/CloudinaryService";
+import { DatabaseConnection } from "../Infrastructure/Database/mongo/DatabaseConnection";
+import { MongoClientRepository } from "../Infrastructure/Database/mongo/MongoClientRepository";
+import { MongoUserRepository } from "../Infrastructure/Database/mongo/MongoUserRepository";
+import { BcryptService } from "../Infrastructure/Services/BcryptService";
+import { JwtTokenService } from "../Infrastructure/Services/JwtTokenService";
+import { ClientController } from "../Presentation/Controllers/ClientController";
+import { UserController } from "../Presentation/Controllers/UserController";
+import { ClientRoutes } from "../Presentation/Routes/ClientRoutes";
+import { UserRoutes } from "../Presentation/Routes/UserRoutes";
+
 
 export class Container {
   private static instance: Container;
   private databaseConnection: DatabaseConnection;
   // Repositories
   private userRepository: MongoUserRepository | null = null;
-  private clienteRepository: MongoClientRepository | null = null; // Assuming you have a similar repository for Cliente
+  private clientRepository: MongoClientRepository | null = null; // Assuming you have a similar repository for Cliente
 
   // Use Cases
   private registerUseCase: RegisterUseCase | null = null;
   private loginUseCase: LoginUseCase | null = null;
-  private createClienteUseCase: CreateClienteUseCase | null = null; // Assuming you have a use case for creating Cliente
-  private updateClienteUseCase: UpdateClienteUseCase | null = null; // Assuming you have a use case for updating Cliente
-  private getPageClientesUseCase: GetPageClientesUseCase | null = null; // Assuming you have a use case for getting paginated Clientes
-  private getClienteUseCase: GetClienteUseCase | null = null; // Assuming you have a use case for getting a specific Cliente
-  private deleteClienteUseCase: DeleteClienteUseCase | null = null;
+  private createClientUseCase: CreateClientUseCase | null = null; // Assuming you have a use case for creating Client
+  private updateClientUseCase: UpdateClientUseCase | null = null; // Assuming you have a use case for updating Cliente
+  private getPageClientsUseCase: GetPageClientsUseCase | null = null; // Assuming you have a use case for getting paginated Clientes
+  private getClientUseCase: GetClientUseCase | null = null; // Assuming you have a use case for getting a specific Cliente
+  private deleteClientUseCase: DeleteClientUseCase | null = null;
 
   private userController: UserController | null = null;
   private userRoutes: UserRoutes | null = null;
 
-  private clientesController: ClienteController | null = null;
-  private clienteRoutes: ClienteRoutes | null = null;
+  private clientsController: ClientController | null = null;
+  private clientRoutes: ClientRoutes | null = null;
 
   // Services
   private encryptService: BcryptService | null = null;
-  private tokenService: TokenService | null = null;
+  private tokenRepository: TokenRepository | null = null;
 
-  private imageService: ImageService | null = null;
+  private imageRepository: ImageRepository | null = null;
 
   private constructor() {
     this.databaseConnection = new DatabaseConnection();
@@ -67,7 +68,7 @@ export class Container {
     api_secret: string
   ): Promise<void> {
     const database = await this.databaseConnection.connect(connectionString, databaseName);
-    this.imageService = new CloudinaryService(
+    this.imageRepository = new CloudinaryService(
       cloud_name,
       api_key,
       api_secret
@@ -75,32 +76,32 @@ export class Container {
 
     // Services
     this.encryptService = new BcryptService();
-    this.tokenService = new JwtTokenService(secret, 3900);
+    this.tokenRepository = new JwtTokenService(secret, 3900);
 
     // Repositories
     this.userRepository = new MongoUserRepository(database);
-    this.clienteRepository = new MongoClientRepository(database); // Assuming you have a similar repository for Cliente
+    this.clientRepository = new MongoClientRepository(database); // Assuming you have a similar repository for Cliente
 
     // Use Cases
     this.registerUseCase = new RegisterUseCase(this.userRepository, this.encryptService);
-    this.loginUseCase = new LoginUseCase(this.userRepository, this.encryptService, this.tokenService);
-    this.createClienteUseCase = new CreateClienteUseCase(
-      this.clienteRepository,
-      this.imageService
+    this.loginUseCase = new LoginUseCase(this.userRepository, this.encryptService, this.tokenRepository);
+    this.createClientUseCase = new CreateClientUseCase(
+      this.clientRepository,
+      this.imageRepository
     );
-    this.updateClienteUseCase = new UpdateClienteUseCase(
-      this.clienteRepository,
-      this.imageService
+    this.updateClientUseCase = new UpdateClientUseCase(
+      this.clientRepository,
+      this.imageRepository
     );
-    this.getPageClientesUseCase = new GetPageClientesUseCase(
-      this.clienteRepository
+    this.getPageClientsUseCase = new GetPageClientsUseCase(
+      this.clientRepository
     );
-    this.getClienteUseCase = new GetClienteUseCase(
-      this.clienteRepository
+    this.getClientUseCase = new GetClientUseCase(
+      this.clientRepository
     );
-    this.deleteClienteUseCase = new DeleteClienteUseCase(
-      this.clienteRepository,
-      this.imageService
+    this.deleteClientUseCase = new DeleteClientUseCase(
+      this.clientRepository,
+      this.imageRepository
     );
 
 
@@ -109,34 +110,34 @@ export class Container {
       this.registerUseCase,
       this.loginUseCase
     );
-    this.clientesController = new ClienteController(
-      this.createClienteUseCase,
-      this.updateClienteUseCase,
-      this.getPageClientesUseCase,
-      this.getClienteUseCase,
-      this.deleteClienteUseCase
+    this.clientsController = new ClientController(
+      this.createClientUseCase,
+      this.updateClientUseCase,
+      this.getPageClientsUseCase,
+      this.getClientUseCase,
+      this.deleteClientUseCase
     );
 
     // Routes
     this.userRoutes = new UserRoutes(this.userController);
-    this.clienteRoutes = new ClienteRoutes(
-      this.clientesController,
-      this.tokenService
+    this.clientRoutes = new ClientRoutes(
+      this.clientsController,
+      this.tokenRepository
     );
   }
 
   getUserRoutes(): UserRoutes {
     if (!this.userRoutes) {
-      throw new Error('Contenedor no inicializado');
+      throw new Error('Container not initialized');
     }
     return this.userRoutes;
   }
 
-  getClienteRoutes(): ClienteRoutes {
-    if (!this.clienteRoutes) {
-      throw new Error('Contenedor no inicializado');
+  getClientRoutes(): ClientRoutes {
+    if (!this.clientRoutes) {
+      throw new Error('Container not initialized');
     }
-    return this.clienteRoutes;
+    return this.clientRoutes;
   }
 
   async shutdown(): Promise<void> {

@@ -1,5 +1,5 @@
-import { ImageService } from "../../../Domain/Services/ImageService";
-import { ClientRepository } from "../../../Domain/Repositories/ClientRepository";
+import { ImageRepository } from "../../../Domain/Repository/ImageRepository";
+import { ClientRepository } from "../../../Domain/Repository/ClientRepository";
 import { ClienteAlreadyExistsException } from "../../../Domain/Exceptions/Clients/ClientAlreadyExistsException";
 import { CreateClientRequest } from "../../DTOs/CreateClient/CreateClientRequest";
 import { CreateClientResponse } from "../../DTOs/CreateClient/CreateClientResponse";
@@ -14,7 +14,7 @@ import { ClientEntity } from "src/Domain/Entities/ClientEntity";
 export class CreateClientUseCase {
   constructor(
     private readonly clienteRepository: ClientRepository,
-    private readonly imageService: ImageService
+    private readonly imageRepository: ImageRepository
   ) {}
 
   async execute(request: CreateClientRequest): Promise<CreateClientResponse> {
@@ -36,7 +36,7 @@ export class CreateClientUseCase {
     // Subir imagen si se incluye un archivo en el request
     if (characterIcon.type === 'File') {
       const file = characterIcon.getValue() as Express.Multer.File;
-      const { id, url } = await this.imageService.uploadImage(
+      const { id, url } = await this.imageRepository.uploadImage(
         file,
         clientKey.getValue()
       );

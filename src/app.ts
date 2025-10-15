@@ -1,8 +1,8 @@
 import express from 'express';
-import { Container } from './DI/Container';
 
 // inicializamos el env
 import dotenv from 'dotenv';
+import { Container } from './DI/Container';
 dotenv.config();
 
 const app = express();
@@ -13,22 +13,22 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secret_secret_secret_secret_secret
 
 const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'your_cloud_name';
 const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY || 'your_api_key';
-const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || 'your_api_secret'; 
+const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || 'your_api_secret';
 // Middleware
 app.use(express.json());
 
 // Health check
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
-});
 
 export async function bootstrap() {
   try {
+    app.get('/health', (req, res) => {
+      res.json({ status: 'OK', timestamp: new Date().toISOString() });
+    });
     // Initialize container
-    const container = Container.getInstance(); 
+    const container = Container.getInstance();
     await container.initialize(
-      MONGO_URI, 
-      DB_NAME, 
+      MONGO_URI,
+      DB_NAME,
       JWT_SECRET,
       CLOUDINARY_CLOUD_NAME,
       CLOUDINARY_API_KEY,
@@ -39,8 +39,8 @@ export async function bootstrap() {
     const userRoutes = container.getUserRoutes();
     app.use('/api/users', userRoutes.getRouter());
 
-    const clienteRoutes = container.getClienteRoutes();
-    app.use('/api/clients', clienteRoutes.getRouter());
+    const clientRoutes = container.getClientRoutes();
+    app.use('/api/clients', clientRoutes.getRouter());
 
     // Global error handler
     app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {

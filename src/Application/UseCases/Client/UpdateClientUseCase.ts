@@ -1,8 +1,8 @@
-import { ImageService } from "../../../Domain/Services/ImageService";
-import { ClientRepository } from "../../../Domain/Repositories/ClientRepository";
-import { UpdateClienteRequest } from "../../DTOs/UpdateClient/UpdateClientRequest";
-import { UpdateClienteResponse } from "../../DTOs/UpdateClient/UpdateClientResponse";
-import { ClienteNotExistsException } from "../../../Domain/Exceptions/Clients/ClienteNotExistsException";
+import { ImageRepository } from "../../../Domain/Repository/ImageRepository";
+import { ClientRepository } from "../../../Domain/Repository/ClientRepository";
+import { UpdateClientRequest } from "../../DTOs/UpdateClient/UpdateClientRequest";
+import { UpdateClientResponse } from "../../DTOs/UpdateClient/UpdateClientResponse";
+import { ClientNotExistsException } from "../../../Domain/Exceptions/Clients/ClientNotExistsException";
 import { InvalidCharacterIconException } from "../../../Domain/Exceptions/Clients/InvalidCharacterIconException";
 import { ClientKeyVO } from "src/Domain/ValueObjects/ClientKeyVO";
 import { CharacterIconVO } from "src/Domain/ValueObjects/CharacterIconVO";
@@ -11,17 +11,17 @@ import { CharacterIconVO } from "src/Domain/ValueObjects/CharacterIconVO";
 export class UpdateClientUseCase {
     constructor(
         private readonly clientRepository: ClientRepository,
-        private readonly imageService: ImageService
+        private readonly imageRepository: ImageRepository
     ) { }
 
-    async execute(request: UpdateClienteRequest): Promise<UpdateClienteResponse> {
+    async execute(request: UpdateClientRequest): Promise<UpdateClientResponse> {
         // Validar datos de entrada usando Value Objects
-        const claveCliente = new ClientKeyVO(request.claveCliente);
+        const clientKey = new ClientKeyVO(request.clientKey);
         // Verificar que el cliente no exista
-        const existingCliente = await this.clientRepository.findByClientKey(claveCliente.getValue());
+        const existingCliente = await this.clientRepository.findByClientKey(clientKey.getValue());
 
         if (!existingCliente) {
-            throw new ClienteNotExistsException(claveCliente.getValue());
+            throw new ClientNotExistsException(clientKey.getValue());
         }
 
         if (request.characterIcon) {
@@ -31,7 +31,7 @@ export class UpdateClientUseCase {
                 typeof existingCliente.characterIcon === 'object' &&
                 'id' in existingCliente.characterIcon
             ) {
-                await this.imageService.deleteImage(existingCliente.characterIcon.id);
+                await this.imageRepository.deleteImage(existingCliente.characterIcon.id);
             }
             if (typeof request.characterIcon === 'string') {
                 // Convertir a Number y que sea del 0 al 9 1 caracter
@@ -46,7 +46,7 @@ export class UpdateClientUseCase {
                 }
                 request.characterIcon = new CharacterIconVO(request.characterIcon);
             } else {
-                const { id, url } = await this.imageService.uploadImage(request.characterIcon, claveCliente.getValue());
+                const { id, url } = await this.imageRepository.uploadImage(request.characterIcon, clientKey.getValue());
                 request.characterIcon = new CharacterIconVO({
                     id,
                     url
@@ -55,21 +55,21 @@ export class UpdateClientUseCase {
         }
 
         const clienteUpdated = await this.clientRepository.updateClient(
-            clientKey: string, 
-            name?: string | undefined, 
-            phone?: string | undefined, 
-            email?: string | undefined, 
-            characterIcon?: string | undefined
+            clientKey.getValue(),
+            request.name,
+            request.phone,
+            request.email,
+            request.characterIcon
         );
 
         if (!clienteUpdated) {
-            throw new ClienteNotExistsException(claveCliente.getValue());
+            throw new ClientNotExistsException(clientKey.getValue());
         }
 
         // Retornar respuesta
         return {
             success: true,
-            message: `Cliente con clave ${claveCliente.getValue()} actualizado correctamente.`,
+            message: `Client with key ${clientKey.getValue()} updated successfully.`,
         }
     }
 }

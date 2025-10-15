@@ -1,8 +1,8 @@
 import { v2 as cloudinary } from 'cloudinary';
+import { ImageRepository } from 'src/Domain/Repository/ImageRepository';
 import streamifier from 'streamifier';
-import { ImageService } from '../../Domain/Services/ImageService';
 
-export class CloudinaryService implements ImageService {
+export class CloudinaryService implements ImageRepository {
 
   constructor(cloud_name: string, api_key: string, api_secret: string) {
     cloudinary.config({ cloud_name, api_key, api_secret });

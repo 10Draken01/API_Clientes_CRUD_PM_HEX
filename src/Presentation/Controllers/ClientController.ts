@@ -1,38 +1,48 @@
-import { CreateClientUseCase } from "src/Application/UseCases/Client/CreateClientUseCase";
-import { UpdateClienteUseCase } from "src/Application/UseCases/Client/UpdateClientUseCase";
+import { CreateClientRequest } from "@/src/Application/DTOs/CreateClient/CreateClientRequest";
+import { CreateClientUseCase } from "@/src/Application/UseCases/Client/CreateClientUseCase";
+import { DeleteClientUseCase } from "@/src/Application/UseCases/Client/DeleteClientUseCase";
+import { GetClientUseCase } from "@/src/Application/UseCases/Client/GetClientUseCase";
+import { GetPageClientsUseCase } from "@/src/Application/UseCases/Client/GetPageClientsUseCase";
+import { UpdateClientUseCase } from "@/src/Application/UseCases/Client/UpdateClientUseCase";
+import { ClienteAlreadyExistsException } from "@/src/Domain/Exceptions/Clients/ClientAlreadyExistsException";
+import { ClientNotExistsException } from "@/src/Domain/Exceptions/Clients/ClientNotExistsException";
+import { InexistPagesException } from "@/src/Domain/Exceptions/Clients/InexistPagesException";
+import { InvalidPageException } from "@/src/Domain/Exceptions/Clients/InvalidPageException";
+import { InvalidEmailError } from "@/src/Domain/Exceptions/Users/InvalidEmailError";
+import { Response, Request } from "express";
 
 
 export class ClientController {
   constructor(
-    private readonly createClienteUseCase: CreateClientUseCase,
-    private readonly updateClienteUseCase: UpdateClienteUseCase, // Asumiendo que el mismo caso de uso maneja creación y actualización
-    private readonly getPageClientesUseCase: GetPageClientesUseCase, // Asumiendo que tienes un caso de uso para obtener la página de clientes
-    private readonly getClienteUseCase: GetClienteUseCase, // Asumiendo que tienes un caso de uso para obtener un cliente específico
-    private readonly deleteClienteUseCase: DeleteClienteUseCase
+    private readonly createClientUseCase: CreateClientUseCase,
+    private readonly updateClientUseCase: UpdateClientUseCase, // Asumiendo que el mismo caso de uso maneja creación y actualización
+    private readonly getPageClientsUseCase: GetPageClientsUseCase, // Asumiendo que tienes un caso de uso para obtener la página de clientes
+    private readonly getClientUseCase: GetClientUseCase, // Asumiendo que tienes un caso de uso para obtener un cliente específico
+    private readonly deleteClientUseCase: DeleteClientUseCase
   ) { }
 
-  async createCliente(req: Request, res: Response): Promise<void> {
+  async createClient(req: Request, res: Response): Promise<void> {
     try {
 
       const characterIcon = req.file ?? req.body.characterIcon;
 
-      const request: CreateClienteRequest = {
-        claveCliente: req.body.claveCliente,
-        nombre: req.body.nombre,
-        celular: req.body.celular,
+      const request: CreateClientRequest = {
+        clientKey: req.body.clientKey,
+        name: req.body.name,
+        phone: req.body.phone,
         email: req.body.email,
         characterIcon: characterIcon, // Asumiendo que characterIcon puede ser un archivo o un número
       };
 
       if (req.file) {
-        console.log(`Archivo recibido: ${req.file.originalname} (${req.file.mimetype}, ${req.file.size} bytes)`);
+        console.log(`File received: ${req.file.originalname} (${req.file.mimetype}, ${req.file.size} bytes)`);
       }
 
       res.status(200).json(
-        await this.createClienteUseCase.execute(request)
+        await this.createClientUseCase.execute(request)
       );
     } catch (error) {
-      console.error('Error al crear cliente:', error);
+      console.error('Error creating client:', error);
       if (error instanceof InvalidEmailError) {
         res.status(400).json({
           success: false,
@@ -64,27 +74,27 @@ export class ClientController {
     }
   }
 
-  async updateCliente(req: Request, res: Response): Promise<void> {
+  async updateClient(req: Request, res: Response): Promise<void> {
     try {
       const characterIcon = req.file ?? req.body.characterIcon;
 
-      const request: CreateClienteRequest = {
-        claveCliente: req.params.clave_cliente, // Asumiendo que la clave del cliente se pasa como parámetro de ruta
-        nombre: req.body.nombre,
-        celular: req.body.celular,
+      const request: CreateClientRequest = {
+        clientKey: req.params.clientKey, // Asumiendo que la clave del cliente se pasa como parámetro de ruta
+        name: req.body.name,
+        phone: req.body.phone,
         email: req.body.email,
         characterIcon: characterIcon,
       };
 
       if (req.file) {
-        console.log(`Archivo recibido: ${req.file.originalname} (${req.file.mimetype}, ${req.file.size} bytes)`);
+        console.log(`File received: ${req.file.originalname} (${req.file.mimetype}, ${req.file.size} bytes)`);
       }
 
       res.status(200).json(
-        await this.updateClienteUseCase.execute(request)
+        await this.updateClientUseCase.execute(request)
       );
     } catch (error) {
-      console.error('Error al actualizar cliente:', error);
+      console.error('Error updating client:', error);
 
       if (error instanceof ClienteAlreadyExistsException) {
         res.status(409).json({
@@ -109,15 +119,15 @@ export class ClientController {
     }
   }
 
-  async getPageClientes (req: Request, res: Response): Promise<void> {
+  async getPageClients (req: Request, res: Response): Promise<void> {
     try {
       const page = parseInt(req.params.page as string) || 1; // Obtener el número de página desde la query, por defecto 1
 
       res.status(200).json(
-        await this.getPageClientesUseCase.execute({ page })
+        await this.getPageClientsUseCase.execute({ page })
       );
     } catch (error) {
-      console.error('Error al obtener página de clientes:', error);
+      console.error('Error getting page of clients:', error);
 
       if( error instanceof InexistPagesException) {
         res.status(404).json({
@@ -144,17 +154,17 @@ export class ClientController {
     }
   }
 
-  async getCliente(req: Request, res: Response): Promise<void> {
+  async getClient(req: Request, res: Response): Promise<void> {
     try {
-      const claveCliente = req.params.claveCliente; // Asumiendo que la clave del cliente se pasa como parámetro de ruta
+      const clientKey = req.params.clientKey; // Asumiendo que la clave del cliente se pasa como parámetro de ruta
 
       res.status(200).json(
-        await this.getClienteUseCase.execute({ claveCliente })
+        await this.getClientUseCase.execute({ clientKey })
       );
     } catch (error) {
-      console.error('Error al obtener cliente:', error);
+      console.error('Error getting client:', error);
 
-      if (error instanceof ClienteNotExistsException) {
+      if (error instanceof ClientNotExistsException) {
         res.status(404).json({
           success: false,
           message: `Not Found: ${error.message}`,
@@ -169,18 +179,17 @@ export class ClientController {
     }
   }
 
-  async deleteCliente(req: Request, res: Response): Promise<void> {
-    try{
-      const claveCliente = req.params.claveCliente; 
-
+  async deleteClient(req: Request, res: Response): Promise<void> {
+    try {
+      const clientKey = req.params.clientKey; // Asumiendo que la clave del cliente se pasa como parámetro de ruta
 
       res.status(200).json(
-        await this.deleteClienteUseCase.execute({ claveCliente })
+        await this.deleteClientUseCase.execute({ clientKey })
       );
     } catch (error) {
-      console.error('Error al obtener cliente:', error);
+      console.error('Error getting client:', error);
 
-      if (error instanceof ClienteNotExistsException) {
+      if (error instanceof ClientNotExistsException) {
         res.status(404).json({
           success: false,
           message: `Not Found: ${error.message}`,

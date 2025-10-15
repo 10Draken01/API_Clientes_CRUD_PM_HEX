@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
-import { TokenService } from '../../Domain/Services/TokenService';
+import { TokenRepository } from '../../Domain/Repository/TokenRepository';
 
-export class JwtTokenService implements TokenService {
+export class JwtTokenService implements TokenRepository {
   private readonly secret: string;
   private readonly expiresIn: number;
 

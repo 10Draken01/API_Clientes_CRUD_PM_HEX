@@ -1,6 +1,6 @@
 export class ClienteAlreadyExistsException extends Error {
   constructor(clave_cliente: string) {
-    super(`Cliente con clave ${clave_cliente} ya existe.`);
+    super(`Client with key ${clave_cliente} already exists.`);
     this.name = 'ClienteAlreadyExistsException';
   }
 }

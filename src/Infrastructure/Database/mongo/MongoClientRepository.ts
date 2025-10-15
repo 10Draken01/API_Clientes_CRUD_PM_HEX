@@ -1,5 +1,5 @@
 import { Db, Collection } from 'mongodb';
-import { ClientRepository } from '../../../Domain/Repositories/ClientRepository';
+import { ClientRepository } from '../../../Domain/Repository/ClientRepository';
 import { ClientEntity } from '../../../Domain/Entities/ClientEntity';
 
 

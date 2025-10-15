@@ -1,6 +1,6 @@
 export class UserNotExistsException extends Error {
   constructor(email: string) {
-    super(`Usuario con email ${email} no existe.`);
+    super(`User with email ${email} does not exist.`);
     this.name = 'UserNotExistsException';
   }
 }

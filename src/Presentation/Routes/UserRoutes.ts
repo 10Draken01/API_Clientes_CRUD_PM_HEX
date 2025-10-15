@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { UserController } from '../Controllers/UserController';
-import { validateLogin, validateRegister } from '../Middleware/ValidationMiddleware';
+import { validateLogin, validateRegister } from '../Middleware/Users/UsersValidationsMiddlewares';
 
 export class UserRoutes {
   private router: Router;

@@ -1,19 +1,19 @@
 import { Db, Collection } from 'mongodb';
-import { UserRepository } from '../../../Domain/Repositories/UserRepository';
-import { User } from '../../../Domain/Entities/UserEntity';
+import { UserRepository } from '../../../Domain/Repository/UserRepository';
+import { UserEntity } from '../../../Domain/Entities/UserEntity';
 
 export class MongoUserRepository implements UserRepository {
-  private readonly collection: Collection<User>;
+  private readonly collection: Collection<UserEntity>;
 
   constructor(database: Db) {
-    this.collection = database.collection<User>('users');
+    this.collection = database.collection<UserEntity>('users');
   }
 
-  async save(user: User): Promise<void> {
+  async save(user: UserEntity): Promise<void> {
     await this.collection.insertOne(user);
   }
 
-  async findByEmail(email: string): Promise<User | null> {
+  async findByEmail(email: string): Promise<UserEntity | null> {
     const user = await this.collection.findOne({ email });
     
     if (!user) {

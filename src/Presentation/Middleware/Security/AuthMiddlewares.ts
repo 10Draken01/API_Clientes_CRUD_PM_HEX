@@ -1,7 +1,8 @@
-import { TokenService } from "@/src/Domain/Services/TokenService";
+
+import { TokenRepository } from "@/src/Domain/Repository/TokenRepository";
 import { NextFunction, Request, Response } from "express";
 
-export const AuthMiddleware = (tokenService: TokenService) => {
+export const AuthMiddleware = (tokenRepository: TokenRepository) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authHeader = req.headers.authorization;
@@ -15,7 +16,7 @@ export const AuthMiddleware = (tokenService: TokenService) => {
         return;
       }
 
-      const decoded = await tokenService.verifyToken(token);
+      const decoded = await tokenRepository.verifyToken(token);
       (req as any).user = decoded;
       next();
     } catch (err) {

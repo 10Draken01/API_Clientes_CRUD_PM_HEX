@@ -1,30 +1,30 @@
-import { User } from "../../../Domain/Entities/UserEntity";
-import { UserRepository } from "../../../Domain/Repositories/UserRepository";
-import { EncryptService } from "../../../Domain/Services/EncryptService";
-import { Email } from "../../../Domain/ValueObjects/EmailVO";
-import { Password } from "../../../Domain/ValueObjects/PasswordVO";
-import { Id } from "../../../Domain/ValueObjects/IdVO";
-import { Username } from "../../../Domain/ValueObjects/UsernameVO";
+import { UserEntity } from "../../../Domain/Entities/UserEntity";
+import { UserRepository } from "../../../Domain/Repository/UserRepository";
+import { EncryptRepository } from "../../../Domain/Repository/EncryptRepository";
+import { EmailVO } from "../../../Domain/ValueObjects/EmailVO";
+import { PasswordVO } from "../../../Domain/ValueObjects/PasswordVO";
+import { IdVO } from "../../../Domain/ValueObjects/IdVO";
+import { UsernameVO } from "../../../Domain/ValueObjects/UsernameVO";
 import { RegisterRequest } from "../../DTOs/Register/RegisterRequest";
 import { RegisterResponse } from "../../DTOs/Register/RegisterResponse";
-import { UserAlreadyExistsException } from "../../../Domain/Exceptions/UserAlreadyExistsException";
+import { UserAlreadyExistsException } from "../../../Domain/Exceptions/Users/UserAlreadyExistsException";
 
 
 export class RegisterUseCase {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly encryptService: EncryptService // Asegúrate de inyectar un hasher de contraseñas
+    private readonly encryptRepository: EncryptRepository // Asegúrate de inyectar un hasher de contraseñas
   ) {}
 
   async execute(request: RegisterRequest): Promise<RegisterResponse> {
     // Validar datos de entrada usando Value Objects
-    const userId = new Id();
-    const username = new Username(request.username);
-    const email = new Email(request.email);
-    const password = new Password(request.password); // En un caso real, deberías hashear la contraseña
+    const userId = new IdVO();
+    const username = new UsernameVO(request.username);
+    const email = new EmailVO(request.email);
+    const password = new PasswordVO(request.password); // En un caso real, deberías hashear la contraseña
 
     // Hashear la contraseña antes de guardarla
-    const hashedPassword = await this.encryptService.hash(password.getValue());
+    const hashedPassword = await this.encryptRepository.hash(password.getValue());
     password.setHashedPassword(hashedPassword); // Actualizar el objeto Password con el hash
 
     // Verificar que el usuario no exista
@@ -34,7 +34,7 @@ export class RegisterUseCase {
     }
 
     // Crear el usuario
-    const user: User = {
+    const user: UserEntity = {
       _id: userId.getValue(),
       username: username.getValue(),
       email: email.getValue(),

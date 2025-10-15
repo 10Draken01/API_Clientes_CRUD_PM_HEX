@@ -1,23 +1,24 @@
-import { EncryptService } from "@/src/Domain/Services/EncryptService";
-import { UserRepository } from "../../../Domain/Repositories/UserRepository";
-import { TokenService } from "../../../Domain/Services/TokenService";
-import { Email } from "../../../Domain/ValueObjects/EmailVO";
+
+import { UserRepository } from "../../../Domain/Repository/UserRepository";
+import { TokenRepository } from "../../../Domain/Repository/TokenRepository";
+import { EmailVO } from "../../../Domain/ValueObjects/EmailVO";
 import { LoginRequest } from "../../DTOs/Login/LoginRequest";
 import { LoginResponse } from "../../DTOs/Login/LoginResponse";
-import { InvalidPasswordException } from "../../../Domain/Exceptions/InvalidPasswordException";
-import { UserNotExistsException } from "../../../Domain/Exceptions/UserNotExistsException";
+import { InvalidPasswordException } from "../../../Domain/Exceptions/Users/InvalidPasswordException";
+import { UserNotExistsException } from "../../../Domain/Exceptions/Users/UserNotExistsException";
+import { EncryptRepository } from "@/src/Domain/Repository/EncryptRepository";
 
 
 export class LoginUseCase {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly encryptService: EncryptService, // Asegúrate de inyectar un hasher de contraseñas
-    private readonly tokenService: TokenService // Aquí deberías inyectar un servicio de generación de tokens JWT
+    private readonly encryptRepository: EncryptRepository, // Asegúrate de inyectar un hasher de contraseñas
+    private readonly tokenRepository: TokenRepository // Aquí deberías inyectar un servicio de generación de tokens JWT
   ) {}
 
   async execute(request: LoginRequest): Promise<LoginResponse> {
     // Validar datos de entrada usando Value Objects
-    const email = new Email(request.email);
+    const email = new EmailVO(request.email);
 
     // Verificar que el usuario no exista
     const existingUser = await this.userRepository.findByEmail(email.getValue());
@@ -25,7 +26,7 @@ export class LoginUseCase {
       throw new UserNotExistsException(email.getValue());
     }
 
-    const passwordValidated = await this.encryptService.compare(request.password, existingUser.password);
+    const passwordValidated = await this.encryptRepository.compare(request.password, existingUser.password);
 
     if (!passwordValidated) {
       throw new InvalidPasswordException('Contraseña incorrecta');
@@ -37,7 +38,7 @@ export class LoginUseCase {
       email: email.getValue(),
     }
 
-    const token = await this.tokenService.generateToken(tokenPayload);
+    const token = await this.tokenRepository.generateToken(tokenPayload);
 
     // Retornar respuesta
     return {

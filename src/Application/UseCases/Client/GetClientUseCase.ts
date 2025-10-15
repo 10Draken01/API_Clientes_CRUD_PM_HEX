@@ -1,30 +1,30 @@
+import { ClientRepository } from "../../../Domain/Repository/ClientRepository";
+import { GetClientResponse } from "../../DTOs/GetClient/GetClientResponse";
+import { GetClientRequest } from "../../DTOs/GetClient/GetClientRequest";
+import { ClientKeyVO } from "../../../Domain/ValueObjects/ClientKeyVO";
+import { ClientNotExistsException } from "../../../Domain/Exceptions/Clients/ClientNotExistsException";
 
-import { ClientKeyVO } from "src/Domain/ValueObjects/ClientKeyVO";
-import { ClientRepository } from "../../../Domain/Repositories/ClientRepository";
-import { GetClienteRequest } from "../../DTOs/GetCliente/GetClienteRequest";
-import { GetClienteResponse } from "../../DTOs/GetCliente/GetClienteResponse";
-import { ClienteNotExistsException } from "../../../Domain/Exceptions/Clients/ClienteNotExistsException";
 
 
 export class GetClientUseCase {
     constructor(
-        private readonly clienteRepository: ClientRepository
+        private readonly clientRepository: ClientRepository
     ) { }
 
-    async execute(request: GetClienteRequest): Promise<GetClienteResponse> {
+    async execute(request: GetClientRequest): Promise<GetClientResponse> {
         // Validar datos de entrada usando Value Objects
-        const claveCliente = new ClientKeyVO(request.claveCliente);
+        const clientKey = new ClientKeyVO(request.clientKey);
 
-        // Obtener el cliente por claveCliente
-        const cliente = await this.clienteRepository.findByClientKey(claveCliente.getValue());
+        // Obtener el cliente por clientKey
+        const client = await this.clientRepository.findByClientKey(clientKey.getValue());
 
-        if (!cliente) {
-            throw new ClienteNotExistsException(claveCliente.getValue());
+        if (!client) {
+            throw new ClientNotExistsException(clientKey.getValue());
         }
         // Retornar respuesta
         return {
             success: true,
-            message: `Cliente con clave ${claveCliente.getValue()} obtenido correctamente.`,
+            message: `Cliente con clave ${clientKey.getValue()} obtenido correctamente.`,
         };
     }
 }

@@ -1,7 +1,7 @@
 import * as bcrypt from 'bcrypt';
-import { EncryptService } from '../../Domain/Services/EncryptService';
+import { EncryptRepository } from '../../Domain/Repository/EncryptRepository';
 
-export class BcryptService implements EncryptService {
+export class BcryptService implements EncryptRepository {
   private readonly saltRounds = 12;
 
   async hash(text: string): Promise<string> {

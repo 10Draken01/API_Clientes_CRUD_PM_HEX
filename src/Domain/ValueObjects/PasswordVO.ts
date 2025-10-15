@@ -1,4 +1,4 @@
-import { InvalidPasswordException } from "../Exceptions/InvalidPasswordException";
+import { InvalidPasswordException } from "../Exceptions/Users/InvalidPasswordException";
 
 export class PasswordVO {
   private value: string;
