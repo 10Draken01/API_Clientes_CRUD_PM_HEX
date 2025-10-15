@@ -8,6 +8,8 @@ import { UsernameVO } from "../../../Domain/ValueObjects/UsernameVO";
 import { RegisterRequest } from "../../DTOs/Register/RegisterRequest";
 import { RegisterResponse } from "../../DTOs/Register/RegisterResponse";
 import { UserAlreadyExistsException } from "../../../Domain/Exceptions/Users/UserAlreadyExistsException";
+import { Hash } from "crypto";
+import { HashedPasswordVO } from "@/src/Domain/ValueObjects/HashedPasswordVO";
 
 
 export class RegisterUseCase {
@@ -24,8 +26,9 @@ export class RegisterUseCase {
     const password = new PasswordVO(request.password); // En un caso real, deberías hashear la contraseña
 
     // Hashear la contraseña antes de guardarla
-    const hashedPassword = await this.encryptRepository.hash(password.getValue());
-    password.setHashedPassword(hashedPassword); // Actualizar el objeto Password con el hash
+    const hashedPassword = new HashedPasswordVO(
+      await this.encryptRepository.hash(password.getValue())
+    );
 
     // Verificar que el usuario no exista
     const existingUser = await this.userRepository.findByEmail(email.getValue());
@@ -38,7 +41,7 @@ export class RegisterUseCase {
       _id: userId.getValue(),
       username: username.getValue(),
       email: email.getValue(),
-      password: password.getValue(), // En un caso real, deberías hashear la contraseña
+      password: hashedPassword.getValue(), 
     };
 
     // Guardar el usuario

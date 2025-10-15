@@ -3,6 +3,9 @@ import express from 'express';
 // inicializamos el env
 import dotenv from 'dotenv';
 import { Container } from './DI/Container';
+import { CSVData } from './Infrastructure/Data/CSV_Data';
+
+
 dotenv.config();
 
 const app = express();
@@ -14,8 +17,11 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secret_secret_secret_secret_secret
 const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'your_cloud_name';
 const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY || 'your_api_key';
 const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || 'your_api_secret';
+
+const CSV_Data = new CSVData();
 // Middleware
 app.use(express.json());
+
 
 // Health check
 
@@ -24,6 +30,8 @@ export async function bootstrap() {
     app.get('/health', (req, res) => {
       res.json({ status: 'OK', timestamp: new Date().toISOString() });
     });
+
+    
     // Initialize container
     const container = Container.getInstance();
     await container.initialize(
@@ -32,7 +40,8 @@ export async function bootstrap() {
       JWT_SECRET,
       CLOUDINARY_CLOUD_NAME,
       CLOUDINARY_API_KEY,
-      CLOUDINARY_API_SECRET
+      CLOUDINARY_API_SECRET,
+      await CSV_Data.getVulneablePasswordsData()
     );
 
     // Setup routes WITHOUT global validation middleware
@@ -41,6 +50,9 @@ export async function bootstrap() {
 
     const clientRoutes = container.getClientRoutes();
     app.use('/api/clients', clientRoutes.getRouter());
+
+    const passwordRoutes = container.getPasswordRoutes();
+    app.use('/api/v1/password', passwordRoutes.getRouter());
 
     // Global error handler
     app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
