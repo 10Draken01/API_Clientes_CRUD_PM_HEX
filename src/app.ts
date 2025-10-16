@@ -10,7 +10,8 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 80;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017';
+const MONGO_ROOT_USER = process.env.MONGO_ROOT_USER || 'admin';
+const MONGO_ROOT_PASSWORD = process.env.MONGO_ROOT_PASSWORD || 'password123';
 const DB_NAME = process.env.DB_NAME || 'example_clients_db';
 const JWT_SECRET = process.env.JWT_SECRET || 'secret_secret_secret_secret_secret_secret';
 
@@ -19,6 +20,8 @@ const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY || 'your_api_key';
 const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || 'your_api_secret';
 
 const CSV_Data = new CSVData();
+
+
 // Middleware
 app.use(express.json());
 
@@ -35,7 +38,8 @@ export async function bootstrap() {
     // Initialize container
     const container = Container.getInstance();
     await container.initialize(
-      MONGO_URI,
+      MONGO_ROOT_USER,
+      MONGO_ROOT_PASSWORD,
       DB_NAME,
       JWT_SECRET,
       CLOUDINARY_CLOUD_NAME,
@@ -43,6 +47,9 @@ export async function bootstrap() {
       CLOUDINARY_API_SECRET,
       await CSV_Data.getVulneablePasswordsData()
     );
+
+    // Swagger
+    container.initSwagger(app);
 
     // Setup routes WITHOUT global validation middleware
     const userRoutes = container.getUserRoutes();

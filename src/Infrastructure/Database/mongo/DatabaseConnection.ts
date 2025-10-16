@@ -4,9 +4,10 @@ export class DatabaseConnection {
   private client: MongoClient | null = null;
   private database: Db | null = null;
 
-  async connect(connectionString: string, databaseName: string): Promise<Db> {
+  async connect(mongoRootUser: string, mongoRootPassword: string, databaseName: string): Promise<Db> {
     try {
-      this.client = new MongoClient(connectionString);
+      const url = `mongodb://${mongoRootUser}:${mongoRootPassword}@localhost:27017/?authSource=admin`;
+      this.client = new MongoClient(url);
       await this.client.connect();
       this.database = this.client.db(databaseName);
       console.log('Connected to MongoDB');
@@ -30,4 +31,4 @@ export class DatabaseConnection {
     }
     return this.database;
   }
-}
+} 

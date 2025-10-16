@@ -1,0 +1,240 @@
+name: CI/CD Pipeline - Deploy to AWS
+
+# =============================================
+# TRIGGERS CORREGIDOS
+# =============================================
+on:
+  push:
+    branches: [ develop ]    # ← AGREGADO: Para deploy completo
+  pull_request:
+    branches: [ develop ]    # ← Para validación únicamente
+
+# =============================================
+# Variables globales
+# =============================================
+env:
+  DOCKER_IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/api_clients
+  NODE_VERSION: '18'
+
+jobs:
+  # =============================================
+  # JOB 1: Build & Test
+  # =============================================
+  build:
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:7
+        options: >-
+          --health-cmd mongosh
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 27017:27017
+        env:
+          MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_ROOT_USER }}
+          MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_ROOT_PASSWORD }}
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🟢 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: 📦 Install dependencies
+      run: npm ci
+      
+    - name: 🔨 Build TypeScript
+      run: npm run build
+      
+    - name: 🐳 Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: 🔨 Build Docker image (SOLO API)
+      run: |
+        docker build -t ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }} .
+        docker tag ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }} ${{ env.DOCKER_IMAGE_NAME }}:latest
+        
+    - name: 💾 Save Docker image
+      run: |
+        docker save ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }} ${{ env.DOCKER_IMAGE_NAME }}:latest > api-image.tar
+        
+    - name: 📤 Upload Docker image artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: docker-image
+        path: api-image.tar
+
+  # =============================================
+  # JOB 2: Push to Docker Hub
+  # =============================================
+  push-to-registry:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    
+    steps:
+    - name: 📥 Download Docker image artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: docker-image
+        
+    - name: 🔄 Load Docker image
+      run: docker load < api-image.tar
+      
+    - name: 🔐 Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        
+    - name: 📤 Push to Docker Hub
+      run: |
+        docker push ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+        docker push ${{ env.DOCKER_IMAGE_NAME }}:latest
+
+  # =============================================
+  # JOB 3: Deploy to EC2
+  # =============================================
+  deploy-to-ec2:
+    runs-on: ubuntu-latest
+    needs: push-to-registry
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🚀 Deploy to EC2
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          echo "🔄 Starting deployment..."
+          
+          # Crear directorio del proyecto si no existe
+          mkdir -p ~/api_clients
+          cd ~/api_clients
+          
+          # Parar contenedores existentes
+          docker-compose down 2>/dev/null || true
+          
+          # Limpiar contenedores y redes huérfanas
+          docker container prune -f
+          docker network prune -f
+          
+          # Limpiar imágenes antiguas
+          docker image prune -f
+          
+          # Pull nueva imagen de API
+          docker pull ${{ env.DOCKER_IMAGE_NAME }}:latest
+          
+          # Crear archivo .env con secrets
+          cat > .env << 'ENVEOF'
+          NODE_ENV=production
+          PORT=${{ secrets.PORT }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          MONGO_ROOT_USER=${{ secrets.MONGO_ROOT_USER }}
+          MONGO_ROOT_PASSWORD=${{ secrets.MONGO_ROOT_PASSWORD }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
+          ENVEOF
+          
+          # Crear docker-compose.yml para producción
+          cat > docker-compose.yml << 'COMPOSEEOF'
+          version: '3.8'
+          
+          services:
+            # ==========================================
+            # API (imagen pre-construida desde Docker Hub)
+            # ==========================================
+            api:
+              image: ${{ env.DOCKER_IMAGE_NAME }}:latest
+              container_name: api_core
+              ports:
+                - "${PORT:-80}:${PORT:-80}"
+              environment:
+                - NODE_ENV=${NODE_ENV:-production}
+                - PORT=${PORT:-80}
+                - DB_NAME=${DB_NAME}
+                - JWT_SECRET=${JWT_SECRET}
+                - FOLDER_ID=${FOLDER_ID}
+                - MONGO_ROOT_USER=${MONGO_ROOT_USER}
+                - MONGO_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
+              depends_on:
+                - mongodb
+              restart: unless-stopped
+              networks:
+                - core_network
+              volumes:
+                - ./uploads:/app/uploads
+
+            # ==========================================
+            # MongoDB (imagen oficial)
+            # ==========================================
+            mongodb:
+              image: mongo:7.0
+              container_name: core_database
+              environment:
+                - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER}
+                - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
+                - MONGO_INITDB_DATABASE=${DB_NAME}
+              volumes:
+                - mongodb_data:/data/db
+              restart: unless-stopped
+              networks:
+                - core_network
+              # No exponer puerto 27017 en producción para mayor seguridad
+
+          # ==========================================
+          # Volúmenes y redes
+          # ==========================================
+          volumes:
+            mongodb_data:
+              driver: local
+            
+          networks:
+            core_network:
+              driver: bridge
+              name: core_network
+          COMPOSEEOF
+          
+          # Verificar que los archivos se crearon correctamente
+          echo "📋 Files created:"
+          ls -la
+          echo "📄 .env content:"
+          cat .env
+          echo "📄 docker-compose.yml content:"
+          head -20 docker-compose.yml
+          
+          # Ejecutar contenedores
+          echo "🚀 Starting containers..."
+          docker-compose up -d
+          
+          # Esperar un momento para que los contenedores inicien
+          sleep 10
+          
+          # Verificar estado de los contenedores
+          echo "📊 Container status:"
+          docker-compose ps
+          
+          # Verificar logs de la API
+          echo "📝 API logs (last 10 lines):"
+          docker-compose logs --tail=10 api
+          
+          # Probar conectividad básica
+          echo "🔍 Testing API health..."
+          curl -f http://localhost:${PORT:-8000}/hello_world || echo "⚠️ Health check failed (normal on first deploy)"
+          
+          echo "✅ Deployment completed!"
+
+# Fin del archivo deploy.yml

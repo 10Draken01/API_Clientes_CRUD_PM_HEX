@@ -1,7 +1,6 @@
-import { InsertOneResult } from "mongodb";
-import { User } from "../Entities/UserEntity";
+import { UserEntity } from "../Entities/UserEntity";
 
 export interface UserRepository {
-  save(user: User): Promise<void>;
-  findByEmail(email: string): Promise<User | null>;
+  save(user: UserEntity): Promise<void>;
+  findByEmail(email: string): Promise<UserEntity | null>;
 }

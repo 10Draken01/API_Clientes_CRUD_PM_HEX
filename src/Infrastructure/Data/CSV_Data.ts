@@ -1,6 +1,7 @@
 
 import Papa from 'papaparse';
 import * as fs from 'fs';
+import path from 'path';
 
 export class CSVData {
     private _readCSVFromFile<T>(filePath: string): Promise<T[]> {
@@ -29,7 +30,8 @@ export class CSVData {
     }
 
     async getVulneablePasswordsData(): Promise<string[]> {
-        const data = await this._readCSVFromFile<{ rank: number, password: string }>('src/Infrastructure/Data/VulneablePasswords.csv');
+        const csvPath = path.join(__dirname, 'VulneablePasswords.csv');
+        const data = await this._readCSVFromFile<{ rank: number, password: string }>(csvPath);
         const formatData = data.map(item => `${item.password}`);
         return formatData;
     }

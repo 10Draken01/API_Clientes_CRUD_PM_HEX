@@ -17,6 +17,7 @@ import { MongoUserRepository } from "../Infrastructure/Database/mongo/MongoUserR
 import { BcryptService } from "../Infrastructure/Services/BcryptService";
 import { JwtTokenService } from "../Infrastructure/Services/JwtTokenService";
 import { SecurityPasswordService } from "../Infrastructure/Services/SecurityPasswordService";
+import { SwaggerService } from "../Infrastructure/Services/SwaggerService";
 import { ClientController } from "../Presentation/Controllers/ClientController";
 import { PasswordController } from "../Presentation/Controllers/PasswordController";
 import { UserController } from "../Presentation/Controllers/UserController";
@@ -32,6 +33,9 @@ export class Container {
   private userRepository: MongoUserRepository | null = null;
   private clientRepository: MongoClientRepository | null = null; // Assuming you have a similar repository for Cliente
   private securityPasswordRepository: SecurityPasswordRepository | null = null;
+
+  // Swagger
+  private swaggerService: SwaggerService | null = null;
 
   // Use Cases
   private registerUseCase: RegisterUseCase | null = null;
@@ -70,7 +74,8 @@ export class Container {
   }
 
   async initialize(
-    connectionString: string, 
+    mongoRootUser: string, 
+    mongoRootPassword: string, 
     databaseName: string, 
     secret: string, 
     cloud_name: string, 
@@ -78,12 +83,15 @@ export class Container {
     api_secret: string,
     vulneablePasswords: string[]
   ): Promise<void> {
-    const database = await this.databaseConnection.connect(connectionString, databaseName);
+    const database = await this.databaseConnection.connect(mongoRootUser, mongoRootPassword, databaseName);
     this.imageRepository = new CloudinaryService(
       cloud_name,
       api_key,
       api_secret
     );
+
+    // Swagger
+    this.swaggerService = new SwaggerService();
 
     // Services
     this.encryptService = new BcryptService();
@@ -174,5 +182,12 @@ export class Container {
 
   async shutdown(): Promise<void> {
     await this.databaseConnection.disconnect();
+  }
+
+  initSwagger(app: any) {
+    if (!this.swaggerService) {
+      throw new Error('Container not initialized');
+    }
+    this.swaggerService.initialize(app);
   }
 }
