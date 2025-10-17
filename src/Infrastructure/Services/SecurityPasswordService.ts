@@ -5,7 +5,7 @@ import { PasswordVO } from "@/src/Domain/ValueObjects/PasswordVO";
 export class SecurityPasswordService implements SecurityPasswordRepository {
     constructor(
         private readonly vulneablePasswords: string[]
-    ) {}
+    ) { }
 
     evaluatePassword(password: string): PasswordVO {
         if (!password || password.trim().length < 8) {
@@ -24,10 +24,10 @@ export class SecurityPasswordService implements SecurityPasswordRepository {
         const N = this._calculateWordSpaceSize(password);
         var H = 0;
 
-        if (L != 0 && N != 0) {
+        if (L != 0 && N >= 2) {
             H = L * Math.log2(N);
         }
-
+        console.log(`Entropy (H): ${H}, Length (L): ${L}, Word Space Size (N): ${N}`);
         const strength = this._assessStrength(H);
         const crackTime = this._estimateCrackTime(H);
 
@@ -39,37 +39,27 @@ export class SecurityPasswordService implements SecurityPasswordRepository {
     }
 
     private _calculateWordSpaceSize(password: string): number {
+        const characterSet = {
+            lowercase: /[a-z]/.test(password),
+            uppercase: /[A-Z]/.test(password),
+            digits: /[0-9]/.test(password),
+            symbols: /[!@#$%^&*()_+\-=\[\]{};:'",.<>?/\\|`~\s]/.test(password),
+        };
+
         let N = 0;
-        // Detectar minúsculas
-        if (/[a-z]/.test(password)) {
-            N += 26;
-        }
-
-        // Detectar mayúsculas
-        if (/[A-Z]/.test(password)) {
-            N += 26;
-        }
-
-        // Detectar dígitos
-        if (/[0-9]/.test(password)) {
-            N += 10;
-        }
-
-        // Detectar símbolos especiales
-        if (/[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]/.test(password)) {
-            N += 32;
-        }
+        if (characterSet.lowercase) N += 26;
+        if (characterSet.uppercase) N += 26;
+        if (characterSet.digits) N += 10;
+        if (characterSet.symbols) N += 33; // Incluye espacio y otros símbolos
         return N;
     }
 
     private _assessStrength(entropy: number): string {
-        if (entropy < 28) {
-            return "Muy débil";
-        } else if (entropy < 36) {
+        if (entropy < 60) {
             return "Débil";
-        } else if (entropy < 60) {
-            return "Aceptable";
         } else if (entropy < 128) {
+            return "Aceptable";
+        } else if (entropy < 192) {
             return "Fuerte";
         } else {
             return "Muy fuerte";
@@ -82,6 +72,7 @@ export class SecurityPasswordService implements SecurityPasswordRepository {
 
         // Tiempo promedio = combinaciones / (2 × intentos_por_segundo)
         const seconds = combinations / (2 * attemptsPerSecond);
+        
 
         return {
             seconds: seconds,

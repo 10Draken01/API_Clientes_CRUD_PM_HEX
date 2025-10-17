@@ -37,13 +37,13 @@ COPY package*.json ./
 RUN npm ci --only=production && npm cache clean --force
 
 # Copiar código compilado desde el stage anterior
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/dist/ ./
 
 # =============================================
 # COPIAR ARCHIVOS NECESARIOS DESDE BUILDER
 # =============================================
 # Copiar el CSV desde el builder (donde está el código original)
-COPY --from=builder /app/src/Infrastructure/Data/VulneablePasswords.csv ./dist/src/Infrastructure/Data/
+COPY --from=builder /app/src/Infrastructure/Data/VulneablePasswords.csv ./src/Infrastructure/Data/
 
 # Copiar otros archivos estáticos si los tienes (public, assets, etc)
 # COPY --from=builder /app/public ./public
@@ -64,4 +64,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://localhost:80/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
 
 # Comando para ejecutar la aplicación
-CMD ["node", "dist/index.js"]
+CMD ["node", "index.js"]

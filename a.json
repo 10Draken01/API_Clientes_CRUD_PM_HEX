@@ -1,0 +1,58 @@
+[
+    {
+        "password": "asdaasdaasd",
+        "entropy": 51.70483689955201,
+        "length": 11,
+        "wordSpaceSize": 26,
+        "strength": "Débil",
+        "crackTime": {
+            "seconds": 1815204988619.069,
+            "minutes": 30253416476.984486,
+            "hours": 504223607.9497414,
+            "days": 21009316.99790589,
+            "years": 57520.37507982448
+        }
+    },
+    {
+        "password": "asd12ddaa3sd",
+        "entropy": 62.039100017307746,
+        "length": 12,
+        "wordSpaceSize": 36,
+        "strength": "Aceptable",
+        "crackTime": {
+            "seconds": 2343413124788135,
+            "minutes": 39056885413135.586,
+            "hours": 650948090218.9264,
+            "days": 27122837092.455265,
+            "years": 74258280.8828344
+        }
+    },
+    {
+        "password": "asAd1_A2212d_A.aa3sd",
+        "entropy": 131.39711216661897,
+        "length": 20,
+        "wordSpaceSize": 95,
+        "strength": "Fuerte",
+        "crackTime": {
+            "seconds": 1.772927410526928e+36,
+            "minutes": 2.95487901754488e+34,
+            "hours": 4.9247983625748e+32,
+            "days": 2.0519993177395e+31,
+            "years": 5.618067947267625e+28
+        }
+    },
+    {
+        "password": "ASasAd1_A.22@a12d_A.212__aa3sd",
+        "entropy": 197.09566824992842,
+        "length": 30,
+        "wordSpaceSize": 95,
+        "strength": "Muy fuerte",
+        "crackTime": {
+            "seconds": 1.0615171312707008e+56,
+            "minutes": 1.7691952187845014e+54,
+            "hours": 2.948658697974169e+52,
+            "days": 1.2286077908225704e+51,
+            "years": 3.3637448071802066e+48
+        }
+    }
+]
