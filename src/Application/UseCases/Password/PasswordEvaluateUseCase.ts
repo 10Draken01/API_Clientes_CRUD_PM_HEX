@@ -18,6 +18,8 @@ export class PasswordEvaluateUseCase {
             wordSpaceSize: password.getWordSpaceSize(),
             strength: password.getStrength(),
             crackTime: password.getCrackTime(),
+            formattedCrackTime: password.getFormattedCrackTime(),
+            causes: password.getCauses()
         }
     }
 }

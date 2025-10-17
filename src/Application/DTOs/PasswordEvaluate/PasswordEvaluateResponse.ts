@@ -8,5 +8,9 @@ export interface PasswordEvaluateResponse {
     //      S = fuerza de la contraseña (muy débil, débil, aceptable, fuerte, muy fuerte)
     strength: string,
     //      T = tiempo estimado para crackear la contraseña (en segundos, minutos, horas, días, años)
-    crackTime: { seconds: number; minutes: number; hours: number; days: number; years: number }
+    crackTime: { seconds: number; minutes: number; hours: number; days: number; years: number },
+    //      formattedCrackTime = tiempo estimado para crackear la contraseña en formato legible
+    formattedCrackTime: string,
+    //      C = causas y recomendaciones para mejorar la contraseña
+    causes: string[];
 }
