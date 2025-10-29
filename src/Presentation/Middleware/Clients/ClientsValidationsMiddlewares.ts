@@ -7,26 +7,26 @@ export const validateCreateClient = (req: Request, res: Response, next: NextFunc
       message: 'Faltan campos en el cuerpo/form-data de la solicitud',
       missingFields: [
         'clientKey',
-        'nombre',
-        'celular',
+        'name',
+        'phone',
         'email'
       ].filter(Boolean)
     });
     return;
   }
 
-  const { clientKey, nombre, celular, email } = req.body;
+  const { clientKey, name, phone, email } = req.body;
   // mostrar el body en consola para debug
 
-  if (!clientKey || !nombre || !celular || !email) {
+  if (!clientKey || !name || !phone || !email) {
     // Respuesta de error con campos faltantes y especificando la ruta y un ejemplo de uso
     res.status(400).json({
       success: false,
-      message: 'Todos los campos clientKey, nombre, celular y email son requeridos en el cuerpo de la solicitud.',
+      message: 'Todos los campos clientKey, name, phone y email son requeridos en el cuerpo de la solicitud.',
       missingFields: [
         !clientKey ? 'clientKey' : undefined,
-        !nombre ? 'nombre' : undefined,
-        !celular ? 'celular' : undefined,
+        !name ? 'name' : undefined,
+        !phone ? 'phone' : undefined,
         !email ? 'email' : undefined
       ].filter(Boolean)
     });
@@ -41,8 +41,8 @@ export const validateCreateClient = (req: Request, res: Response, next: NextFunc
       message: 'El campo characterIcon (archivo o numero) es requerido en el form-data/cuerpo de la solicitud.',
       example: {
         clientKey: '123',
-        nombre: 'Juan Perez',
-        celular: '5551234567',
+        name: 'Juan Perez',
+        phone: '5551234567',
         email: 'juan@example.com',
         characterIcon: '<archivo o numero>'
       }
@@ -71,8 +71,8 @@ export const validateUpdateClient = (req: Request, res: Response, next: NextFunc
       success: false,
       message: 'Faltan campos en el cuerpo de la solicitud',
       missingFields: [
-        'nombre',
-        'celular',
+        'name',
+        'phone',
         'email',
         'characterIcon'
       ].filter(Boolean)
@@ -81,14 +81,14 @@ export const validateUpdateClient = (req: Request, res: Response, next: NextFunc
   }
 
   // Validar que al menos un campo a actualizar esté presente en el body
-  const { nombre, celular, email, characterIcon } = req.body;
-  if (!nombre && !celular && !email && !characterIcon && !(req as any).file?.buffer) {
+  const { name, phone, email, characterIcon } = req.body;
+  if (!name && !phone && !email && !characterIcon && !(req as any).file?.buffer) {
     res.status(400).json({
       success: false,
-      message: 'Debe proporcionar al menos un campo para actualizar: nombre, celular, email o characterIcon.',
+      message: 'Debe proporcionar al menos un campo para actualizar: name, phone, email o characterIcon.',
       example: {
-        nombre: 'New Name',
-        celular: '5551234567',
+        name: 'New Name',
+        phone: '5551234567',
         email: 'email@email.com',
         characterIcon: '<file or number>'
       }

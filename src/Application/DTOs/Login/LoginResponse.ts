@@ -1,7 +1,10 @@
 export interface LoginResponse {
-  _id: string;
-  username: string;
-  email: string;
-  token: string;
-  expiresIn: number;
+  success: boolean;
+  message: string;
+  user: {
+    id: string;
+    username: string;
+    email: string;
+    token: string;
+  }
 }

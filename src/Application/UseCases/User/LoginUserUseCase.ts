@@ -14,7 +14,7 @@ export class LoginUseCase {
     private readonly userRepository: UserRepository,
     private readonly encryptRepository: EncryptRepository, // Asegúrate de inyectar un hasher de contraseñas
     private readonly tokenRepository: TokenRepository // Aquí deberías inyectar un servicio de generación de tokens JWT
-  ) {}
+  ) { }
 
   async execute(request: LoginRequest): Promise<LoginResponse> {
     // Validar datos de entrada usando Value Objects
@@ -42,11 +42,14 @@ export class LoginUseCase {
 
     // Retornar respuesta
     return {
-      _id: existingUser._id,
-      username: existingUser.username,
-      email: email.getValue(),
-      token: token, // Aquí deberías generar un token JWT
-      expiresIn: 3600, // Por ejemplo, 1 hora
+      success: true,
+      message: 'Login successful',
+      user: {
+        id: existingUser._id,
+        username: existingUser.username,
+        email: email.getValue(),
+        token: token,
+      }
     };
-  } 
+  }
 }

@@ -6,7 +6,7 @@ export class DatabaseConnection {
 
   async connect(mongoRootUser: string, mongoRootPassword: string, databaseName: string): Promise<Db> {
     try {
-      const url = `mongodb://${mongoRootUser}:${mongoRootPassword}@mongodb:27017/?authSource=admin`;
+      const url = `mongodb://${mongoRootUser}:${mongoRootPassword}@localhost:27017/?authSource=admin`;
       this.client = new MongoClient(url);
       await this.client.connect();
       this.database = this.client.db(databaseName);

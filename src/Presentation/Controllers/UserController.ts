@@ -22,11 +22,12 @@ export class UserController {
       var response = await this.loginUseCase.execute(request);
 
       // devolver el token en cabecera
-      res.setHeader('Authorization', `Bearer ${response.token}`);
+      res.setHeader('Authorization', `Bearer ${response.user.token}`);
 
       res.status(200).json({
-        success: true,
-        message: 'Login successful'
+        success: response.success,
+        message: response.message,
+        user: {...response.user, token: undefined}, // No enviar el token en el cuerpo
       });
     } catch (error) {
       if (error instanceof UserNotExistsException) {
